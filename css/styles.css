@@ -1,0 +1,66 @@
+/* Finance AI - Custom Styles for MVP */
+/* Note: Core styles are handled via Tailwind CDN, putting custom overrides here */
+
+body {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Material symbols variation for filled icons */
+.material-symbols-outlined.fill-active {
+    font-variation-settings: 'FILL' 1;
+}
+
+/* Hide scrollbar for clean look */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* ==== SIMULADOR DE FORMATO CELULAR EN PC ==== */
+@media (min-width: 640px) {
+    /* Fondo oscuro con puntos tipo grilla de diseño */
+    html.dark, html {
+        background-color: #121212 !important;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        background-position: 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    /* Caja que simula el canvas del teléfono */
+    body {
+        width: 390px !important;
+        height: 844px !important;
+        min-height: 844px !important;
+        max-height: 844px !important;
+        position: relative !important;
+        
+        /* Borde fino y aspecto de frame de Figma */
+        border-radius: 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+        
+        margin: 2rem auto !important;
+        overflow: hidden !important;
+        flex: none !important;
+        
+        transform: scale(0.95);
+        transform-origin: center center;
+    }
+
+    /* Ajustes requeridos para anular tailwind en containers absolutos */
+    .h-screen { height: 100% !important; }
+    .min-h-screen { min-height: 100% !important; }
+    .w-screen { width: 100% !important; }
+    
+    /* Convertir elementos fijos de viewport, a fijos de contenedor rel (absolutos) */
+    .fixed { position: absolute !important; }
+}

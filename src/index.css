@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Finance AI - Custom Styles */
+@layer base {
+    :root {
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        padding-top: var(--safe-top);
+        min-height: max(700px, 100dvh);
+    }
+}
+
+@layer utilities {
+    /* Material symbols variation for filled icons */
+    .fill-active {
+        font-variation-settings: 'FILL' 1;
+    }
+
+    /* Hide scrollbar for clean look in mobile views */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+
+    /* Optional safe area padding class for navs */
+    .pb-safe {
+        padding-bottom: calc(1.5rem + var(--safe-bottom)) !important;
+    }
+    .pt-safe {
+        padding-top: calc(0.75rem + var(--safe-top)) !important;
+    }
+    /* For <main> to clear the extended bottom nav */
+    .pb-main-safe {
+        padding-bottom: calc(6rem + var(--safe-bottom)) !important;
+    }
+}
+
+/* ==== SIMULADOR DE FORMATO CELULAR EN PC ==== */
+@media (min-width: 640px) {
+    /* Fondo oscuro con puntos tipo grilla de diseño */
+    html.dark, html {
+        background-color: #121212 !important;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        background-position: 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    /* Caja que simula el canvas del teléfono */
+    body {
+        width: 390px !important;
+        height: 844px !important;
+        min-height: 844px !important;
+        max-height: 844px !important;
+        position: relative !important;
+        
+        /* Borde fino y aspecto de frame de Figma */
+        border-radius: 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+        
+        margin: 2rem auto !important;
+        overflow: hidden !important;
+        flex: none !important;
+    }
+
+    /* Ajustes requeridos para anular tailwind en containers absolutos */
+    .h-screen { height: 100% !important; }
+    .min-h-screen { min-height: 100% !important; }
+    .w-screen { width: 100% !important; }
+    
+    /* Convertir elementos fijos de viewport, a fijos de contenedor rel (absolutos) */
+    .fixed { position: absolute !important; }
+}
+
+@keyframes scan {
+  0%, 100% { top: 10%; }
+  50% { top: 90%; }
+}
+.animate-scan {
+  animation: scan 3s ease-in-out infinite;
+}
+

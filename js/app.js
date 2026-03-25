@@ -144,4 +144,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Invoice Scanning Logic
+    const btnUpload = document.getElementById('btn-upload');
+    const fileUpload = document.getElementById('file-upload');
+    const btnCamera = document.getElementById('btn-camera');
+    const cameraCapture = document.getElementById('camera-capture');
+    const btnManual = document.getElementById('btn-manual');
+    const manualModal = document.getElementById('manual-modal');
+    const manualCancel = document.getElementById('manual-cancel');
+    const manualForm = document.getElementById('manual-form');
+    
+    // Trigger file selection for image/PDF
+    if (btnUpload && fileUpload) {
+        btnUpload.addEventListener('click', () => {
+            fileUpload.click();
+        });
+    }
+
+    // Trigger device camera
+    if (btnCamera && cameraCapture) {
+        btnCamera.addEventListener('click', () => {
+            cameraCapture.click();
+        });
+    }
+
+    // Handle Manual Entry Modal
+    if (btnManual && manualModal && manualCancel && manualForm) {
+        btnManual.addEventListener('click', () => {
+            manualModal.classList.remove('hidden');
+        });
+
+        manualCancel.addEventListener('click', () => {
+            manualModal.classList.add('hidden');
+        });
+
+        manualForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // In a real app, you would collect formatting data here
+            console.log('Factura manual guardada');
+            manualModal.classList.add('hidden');
+            manualForm.reset();
+            
+            // Optionally show processing state
+            const processingState = document.getElementById('processing-state');
+            if(processingState) {
+                processingState.classList.remove('hidden');
+                setTimeout(() => {
+                    processingState.classList.add('hidden');
+                    alert('Factura procesada con éxito');
+                }, 2000);
+            }
+        });
+    }
+
 });

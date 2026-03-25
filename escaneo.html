@@ -57,9 +57,9 @@
 <div class="relative flex h-screen w-full flex-col overflow-hidden">
 <!-- Header -->
 <div class="z-20 flex items-center bg-transparent p-4 justify-between backdrop-blur-md border-b border-white/5">
-<button class="text-slate-100 flex size-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+<a href="index.html" class="text-slate-100 flex size-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors">
 <span class="material-symbols-outlined">close</span>
-</button>
+</a>
 <h2 class="text-slate-100 text-sm font-semibold tracking-wide uppercase flex-1 text-center">Escaneo de Facturas</h2>
 <div class="flex w-10 items-center justify-end">
 <button class="flex size-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors text-slate-100">
@@ -82,12 +82,7 @@
 <div class="absolute bottom-0 right-0 viewfinder-corner border-b-2 border-r-2 rounded-br-lg"></div>
 <!-- Scanline -->
 <div class="scanline"></div>
-<!-- Feedback overlay -->
-<div class="absolute inset-0 flex items-center justify-center">
-<div class="bg-primary/20 border border-primary/40 px-4 py-2 rounded-full backdrop-blur-md">
-<p class="text-xs font-medium text-white tracking-wider uppercase">Detectando bordes...</p>
-</div>
-</div>
+
 </div>
 <!-- Instruction Hint -->
 <div class="absolute bottom-8 w-full text-center px-6">
@@ -97,7 +92,8 @@
 </div>
 </div>
 <!-- Processing State & Controls -->
-<div class="z-20 flex flex-col gap-6 bg-background-dark p-6 pt-8 border-t border-white/5 rounded-t-3xl shadow-2xl">
+<div class="z-20 flex flex-col gap-6 bg-background-dark p-6 pt-8 pb-8 border-t border-white/5 rounded-t-3xl shadow-2xl">
+<div id="processing-state" class="hidden w-full">
 <div class="flex flex-col gap-3">
 <div class="flex justify-between items-end">
 <div class="flex flex-col gap-1">
@@ -110,43 +106,64 @@
 <div class="h-full rounded-full bg-primary" style="width: 72%;"></div>
 </div>
 </div>
-<div class="flex items-center justify-between px-4 pb-2">
-<button class="flex shrink-0 items-center justify-center rounded-full size-12 bg-white/5 text-slate-100 hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined">image</span>
-</button>
-<button class="flex shrink-0 items-center justify-center rounded-full size-20 bg-primary shadow-[0_0_30px_-5px_rgba(13,13,242,0.6)] text-white hover:scale-105 transition-transform">
-<span class="material-symbols-outlined !text-4xl">camera</span>
-</button>
-<button class="flex shrink-0 items-center justify-center rounded-full size-12 bg-white/5 text-slate-100 hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined">sync</span>
-</button>
 </div>
-</div>
-<!-- Navigation Bar -->
-<nav class="fixed bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-xl border-t border-border-dark px-6 pb-6 pt-3 z-50">
-    <div class="flex justify-between items-center max-w-md mx-auto px-2 relative">
-        <a class="flex flex-col items-center gap-1 group" href="index.html">
-            <span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">home</span>
-            <span class="text-[10px] font-medium text-slate-500 group-hover:text-primary">Inicio</span>
-        </a>
-        <a class="flex flex-col items-center gap-1 group" href="movimientos.html">
-            <span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">receipt_long</span>
-            <span class="text-[10px] font-medium text-slate-500 group-hover:text-primary">Movimientos</span>
-        </a>
-        <a class="flex flex-col items-center gap-1 group relative -top-6" href="escaneo.html">
-            <div class="w-12 h-12 bg-primary group-hover:bg-primary/90 transition-colors rounded-full flex items-center justify-center shadow-lg shadow-primary/40 border-4 border-background-dark">
-                <span class="material-symbols-outlined text-white">add</span>
-            </div>
-        </a>
-        <a class="flex flex-col items-center gap-1 group" href="asistente.html">
-            <span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">auto_awesome</span>
-            <span class="text-[10px] font-medium text-slate-500 group-hover:text-primary">Asistente</span>
-        </a>
-        <a class="flex flex-col items-center gap-1 group" href="#">
-            <span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">person</span>
-            <span class="text-[10px] font-medium text-slate-500 group-hover:text-primary">Perfil</span>
-        </a>
+<div class="flex items-end justify-between px-6 pb-2">
+    <div class="flex flex-col items-center gap-2">
+        <button id="btn-upload" class="flex shrink-0 items-center justify-center rounded-full size-12 bg-white/5 text-slate-100 hover:bg-white/10 transition-colors" title="Galería">
+            <span class="material-symbols-outlined">image</span>
+        </button>
+        <span class="text-[10px] font-medium text-slate-400">Galería</span>
     </div>
-</nav>
+    
+    <div class="flex flex-col items-center gap-2">
+        <button id="btn-camera" class="flex shrink-0 items-center justify-center rounded-full size-20 bg-primary shadow-[0_0_30px_-5px_rgba(13,13,242,0.6)] text-white hover:scale-105 transition-transform" title="Escanear">
+            <span class="material-symbols-outlined !text-4xl">camera</span>
+        </button>
+        <span class="text-[10px] font-medium text-slate-400">Escanear</span>
+    </div>
+    
+    <div class="flex flex-col items-center gap-2">
+        <button id="btn-manual" class="flex shrink-0 items-center justify-center rounded-full size-12 bg-white/5 text-slate-100 hover:bg-white/10 transition-colors" title="Manual">
+            <span class="material-symbols-outlined">edit</span>
+        </button>
+        <span class="text-[10px] font-medium text-slate-400">Manual</span>
+    </div>
+</div>
+</div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="file-upload" accept="image/*,application/pdf" style="display:none" />
+<input type="file" id="camera-capture" accept="image/*" capture="environment" style="display:none" />
+
+<!-- Manual entry modal -->
+<div id="manual-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-[100]">
+    <div class="bg-background-light dark:bg-background-dark rounded-xl p-6 w-11/12 max-w-md shadow-2xl border border-white/10">
+        <h3 class="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">Cargar manualmente</h3>
+        <p class="text-sm text-slate-500 mb-6">Ingresa los detalles de tu factura o gasto manualmente.</p>
+        <form id="manual-form" class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Proveedor</label>
+                <input type="text" name="vendor" placeholder="Ej. Supermercado" class="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow outline-none" required />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Fecha</label>
+                <input type="date" name="date" class="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow outline-none" required />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Monto</label>
+                <input type="number" name="amount" placeholder="0.00" step="0.01" class="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow outline-none" required />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Categoría / Notas</label>
+                <textarea name="description" placeholder="Añade una descripción..." class="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow outline-none resize-none min-h-[80px]"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 mt-4">
+                <button type="button" id="manual-cancel" class="px-5 py-2.5 font-medium bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-300 dark:hover:bg-white/20 transition-colors">Cancelar</button>
+                <button type="submit" class="px-5 py-2.5 font-medium bg-primary text-white rounded-lg shadow-[0_4px_10px_rgba(13,13,242,0.3)] hover:bg-primary/90 transition-colors">Guardar Factura</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Hidden file inputs -->
 </div>
 </body></html>

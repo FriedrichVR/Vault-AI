@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información Personal - Finance AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0d0df2",
+                        "background-light": "#f5f5f8",
+                        "background-dark": "#121212",
+                        "surface-dark": "#1e1e1e",
+                        "border-dark": "#2a2a2a"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; min-height: max(884px, 100dvh); }
+    </style>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-display antialiased">
+    
+    <!-- Top Header -->
+    <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-border-dark px-4 py-4 flex items-center gap-4">
+        <a href="perfil.html" class="flex items-center justify-center size-10 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
+            <span class="material-symbols-outlined text-slate-700 dark:text-slate-200">arrow_back</span>
+        </a>
+        <h1 class="text-lg font-bold">Información Personal</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto px-6 py-8 max-w-2xl mx-auto w-full flex flex-col gap-6">
+        
+        <p class="text-sm text-slate-500">Mantené tus datos personales actualizados para garantizar la seguridad de tu cuenta.</p>
+        
+        <form class="flex flex-col gap-5">
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Nombre Completo</label>
+                <input type="text" value="Alex Rivera" class="px-4 py-3 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow" />
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Correo Electrónico</label>
+                <input type="email" value="alex.rivera@example.com" class="px-4 py-3 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow" />
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Teléfono</label>
+                <div class="flex gap-2">
+                    <select class="px-4 py-3 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-primary outline-none transition-shadow w-24">
+                        <option>+54</option>
+                        <option>+1</option>
+                        <option>+34</option>
+                    </select>
+                    <input type="tel" value="11 5555 4444" class="flex-1 px-4 py-3 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow" />
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Fecha de Nacimiento</label>
+                <input type="date" value="1990-05-15" class="px-4 py-3 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-shadow" />
+            </div>
+
+            <button type="button" class="mt-8 bg-primary text-white font-bold py-4 rounded-xl shadow-[0_4px_15px_rgba(13,13,242,0.4)] hover:bg-[#0a0ae6] transition-colors">
+                Guardar Cambios
+            </button>
+        </form>
+    </main>
+
+</body>
+</html>

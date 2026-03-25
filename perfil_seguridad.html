@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguridad y Contraseña - Finance AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0d0df2",
+                        "background-light": "#f5f5f8",
+                        "background-dark": "#121212",
+                        "surface-dark": "#1e1e1e",
+                        "border-dark": "#2a2a2a"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; min-height: max(884px, 100dvh); }
+    </style>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-display antialiased">
+    
+    <!-- Top Header -->
+    <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-border-dark px-4 py-4 flex items-center gap-4">
+        <a href="perfil.html" class="flex items-center justify-center size-10 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
+            <span class="material-symbols-outlined text-slate-700 dark:text-slate-200">arrow_back</span>
+        </a>
+        <h1 class="text-lg font-bold">Seguridad y Contraseña</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto px-6 py-8 max-w-2xl mx-auto w-full flex flex-col gap-8">
+        
+        <!-- Access Section -->
+        <section class="flex flex-col gap-4">
+            <h2 class="text-[10px] font-bold tracking-[0.1em] text-slate-400 uppercase px-1">Acceso a la cuenta</h2>
+            <div class="bg-surface-dark border border-border-dark rounded-2xl overflow-hidden shadow-sm">
+                <a href="#" class="flex items-center justify-between p-4 border-b border-border-dark hover:bg-white/5 transition-colors">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-semibold text-white text-sm">Cambiar contraseña</span>
+                        <span class="text-[10px] text-slate-500 font-medium">Última actualización hace 2 meses</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500">chevron_right</span>
+                </a>
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-semibold text-white text-sm">Autenticación Biométrica</span>
+                        <span class="text-[10px] text-slate-500 font-medium">Ingresá con Face ID / Touch ID</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" checked>
+                        <div class="w-9 h-5 bg-slate-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Security -->
+        <section class="flex flex-col gap-4">
+            <h2 class="text-[10px] font-bold tracking-[0.1em] text-slate-400 uppercase px-1">Seguridad Avanzada</h2>
+            <div class="bg-surface-dark border border-border-dark rounded-2xl overflow-hidden shadow-sm">
+                <div class="flex items-center justify-between p-4 border-b border-border-dark">
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-white text-sm">Autenticación de 2 Factores (2FA)</span>
+                            <span class="bg-emerald-500/20 text-emerald-400 text-[8px] uppercase font-bold px-2 py-0.5 rounded-sm">Activo</span>
+                        </div>
+                        <span class="text-[10px] text-slate-500 font-medium">Mayor protección para tus fondos</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500">chevron_right</span>
+                </div>
+                <a href="#" class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-semibold text-white text-sm">Dispositivos Reconocidos</span>
+                        <span class="text-[10px] text-slate-500 font-medium">Revisá dónde iniciaste sesión</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500">devices</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Danger Zone -->
+        <section class="mt-8">
+            <button class="w-full border border-rose-500/30 bg-transparent hover:bg-rose-500/10 text-rose-500 font-bold text-sm py-4 rounded-xl transition-colors">
+                Eliminar Cuenta Permanentemente
+            </button>
+        </section>
+
+    </main>
+
+</body>
+</html>

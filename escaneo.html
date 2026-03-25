@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 
 <html class="dark" lang="es"><head>
+    <script>
+        if (localStorage.getItem('theme') === 'light' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -92,13 +99,13 @@
 </div>
 </div>
 <!-- Processing State & Controls -->
-<div class="z-20 flex flex-col gap-6 bg-background-dark p-6 pt-8 pb-8 border-t border-white/5 rounded-t-3xl shadow-2xl">
+<div class="z-20 flex flex-col gap-6 bg-background-light dark:bg-background-dark p-6 pt-8 pb-8 border-t border-white/5 rounded-t-3xl shadow-2xl">
 <div id="processing-state" class="hidden w-full">
 <div class="flex flex-col gap-3">
 <div class="flex justify-between items-end">
 <div class="flex flex-col gap-1">
-<p class="text-slate-100 text-lg font-semibold leading-none">Procesando factura</p>
-<p class="text-slate-400 text-xs uppercase tracking-widest font-medium">Extrayendo datos fiscales</p>
+<p class="text-slate-900 dark:text-slate-100 text-lg font-semibold leading-none">Procesando factura</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest font-medium">Extrayendo datos fiscales</p>
 </div>
 <p class="text-primary text-sm font-bold tabular-nums">72%</p>
 </div>
@@ -112,21 +119,21 @@
         <button id="btn-upload" class="flex shrink-0 items-center justify-center rounded-full size-12 bg-white/5 text-slate-100 hover:bg-white/10 transition-colors" title="Galería">
             <span class="material-symbols-outlined">image</span>
         </button>
-        <span class="text-[10px] font-medium text-slate-400">Galería</span>
+        <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400">Galería</span>
     </div>
     
     <div class="flex flex-col items-center gap-2">
-        <button id="btn-camera" class="flex shrink-0 items-center justify-center rounded-full size-20 bg-primary shadow-[0_0_30px_-5px_rgba(13,13,242,0.6)] text-white hover:scale-105 transition-transform" title="Escanear">
+        <button id="btn-camera" class="flex shrink-0 items-center justify-center rounded-full size-20 bg-primary shadow-[0_0_30px_-5px_rgba(13,13,242,0.6)] text-slate-900 dark:text-white hover:scale-105 transition-transform" title="Escanear">
             <span class="material-symbols-outlined !text-4xl">camera</span>
         </button>
-        <span class="text-[10px] font-medium text-slate-400">Escanear</span>
+        <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400">Escanear</span>
     </div>
     
     <div class="flex flex-col items-center gap-2">
         <button id="btn-manual" class="flex shrink-0 items-center justify-center rounded-full size-12 bg-white/5 text-slate-100 hover:bg-white/10 transition-colors" title="Manual">
             <span class="material-symbols-outlined">edit</span>
         </button>
-        <span class="text-[10px] font-medium text-slate-400">Manual</span>
+        <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400">Manual</span>
     </div>
 </div>
 </div>

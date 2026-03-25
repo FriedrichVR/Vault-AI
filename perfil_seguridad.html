@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
+    <script>
+        if (localStorage.getItem('theme') === 'light' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <title>Seguridad y Contraseña - Finance AI</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -46,18 +53,18 @@
         
         <!-- Access Section -->
         <section class="flex flex-col gap-4">
-            <h2 class="text-[10px] font-bold tracking-[0.1em] text-slate-400 uppercase px-1">Acceso a la cuenta</h2>
-            <div class="bg-surface-dark border border-border-dark rounded-2xl overflow-hidden shadow-sm">
-                <a href="#" class="flex items-center justify-between p-4 border-b border-border-dark hover:bg-white/5 transition-colors">
+            <h2 class="text-[10px] font-bold tracking-[0.1em] text-slate-500 dark:text-slate-400 dark:text-slate-400 uppercase px-1">Acceso a la cuenta</h2>
+            <div class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-2xl overflow-hidden shadow-sm">
+                <a href="#" class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-dark hover:bg-white/5 transition-colors">
                     <div class="flex flex-col gap-1">
-                        <span class="font-semibold text-white text-sm">Cambiar contraseña</span>
+                        <span class="font-semibold text-slate-900 dark:text-white text-sm">Cambiar contraseña</span>
                         <span class="text-[10px] text-slate-500 font-medium">Última actualización hace 2 meses</span>
                     </div>
                     <span class="material-symbols-outlined text-slate-500">chevron_right</span>
                 </a>
                 <div class="flex items-center justify-between p-4">
                     <div class="flex flex-col gap-1">
-                        <span class="font-semibold text-white text-sm">Autenticación Biométrica</span>
+                        <span class="font-semibold text-slate-900 dark:text-white text-sm">Autenticación Biométrica</span>
                         <span class="text-[10px] text-slate-500 font-medium">Ingresá con Face ID / Touch ID</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
@@ -70,12 +77,12 @@
 
         <!-- Advanced Security -->
         <section class="flex flex-col gap-4">
-            <h2 class="text-[10px] font-bold tracking-[0.1em] text-slate-400 uppercase px-1">Seguridad Avanzada</h2>
-            <div class="bg-surface-dark border border-border-dark rounded-2xl overflow-hidden shadow-sm">
-                <div class="flex items-center justify-between p-4 border-b border-border-dark">
+            <h2 class="text-[10px] font-bold tracking-[0.1em] text-slate-500 dark:text-slate-400 dark:text-slate-400 uppercase px-1">Seguridad Avanzada</h2>
+            <div class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-2xl overflow-hidden shadow-sm">
+                <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-dark">
                     <div class="flex flex-col gap-1">
                         <div class="flex items-center gap-2">
-                            <span class="font-semibold text-white text-sm">Autenticación de 2 Factores (2FA)</span>
+                            <span class="font-semibold text-slate-900 dark:text-white text-sm">Autenticación de 2 Factores (2FA)</span>
                             <span class="bg-emerald-500/20 text-emerald-400 text-[8px] uppercase font-bold px-2 py-0.5 rounded-sm">Activo</span>
                         </div>
                         <span class="text-[10px] text-slate-500 font-medium">Mayor protección para tus fondos</span>
@@ -84,7 +91,7 @@
                 </div>
                 <a href="#" class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
                     <div class="flex flex-col gap-1">
-                        <span class="font-semibold text-white text-sm">Dispositivos Reconocidos</span>
+                        <span class="font-semibold text-slate-900 dark:text-white text-sm">Dispositivos Reconocidos</span>
                         <span class="text-[10px] text-slate-500 font-medium">Revisá dónde iniciaste sesión</span>
                     </div>
                     <span class="material-symbols-outlined text-slate-500">devices</span>

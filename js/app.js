@@ -1,7 +1,25 @@
 // Finance AI - Mobile MVP Main App script
+
+// Theme logic moved to inline <head> in HTML files to prevent FOUC
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Finance AI Mobile App initialized.');
     
+    // Setup Theme Toggle
+    const themeToggle = document.getElementById('dark-mode-toggle');
+    if (themeToggle) {
+        themeToggle.checked = document.documentElement.classList.contains('dark');
+        themeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    }
+
+    console.log('Finance AI Mobile App initialized.');
     // Auto highlight active nav link
     const currentPath = window.location.pathname.split('/').pop() || 'index.html';
     const navLinks = document.querySelectorAll('nav a');
@@ -100,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (item.active) {
                         bar.className = 'w-full bg-primary rounded-md relative shadow-[0_0_20px_rgba(13,13,242,0.4)] z-10 transition-all duration-500 ease-out';
                     } else {
-                        bar.className = 'w-full bg-[#1e1e2d] hover:bg-[#252538] transition-colors rounded-md relative transition-all duration-500 ease-out';
+                        bar.className = 'w-full bg-slate-200 hover:bg-slate-300 dark:bg-[#1e1e2d] dark:hover:bg-[#252538] transition-colors rounded-md relative transition-all duration-500 ease-out';
                     }
                     // start with height 0 for animation
                     bar.style.height = '0%';
@@ -133,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Reset buttons state
                 toggles.forEach(b => {
-                    b.className = 'text-slate-400 text-xs font-medium px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors';
+                    b.className = 'text-slate-500 dark:text-slate-400 text-xs font-medium px-3 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-200 dark:hover:text-white dark:hover:bg-white/5 transition-colors';
                 });
                 
                 // Set active state on clicked button
@@ -193,6 +211,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     processingState.classList.add('hidden');
                     alert('Factura procesada con éxito');
                 }, 2000);
+            }
+        });
+    }
+
+    // Handle Profile Avatar Upload
+    const profileUpload = document.getElementById('profile-upload');
+    const profileAvatar = document.getElementById('profile-avatar');
+    
+    // Check if there is a saved avatar and apply it
+    const savedAvatar = localStorage.getItem('userAvatar');
+    if (savedAvatar) {
+        const allAvatars = document.querySelectorAll('img[data-alt="User profile avatar"], img[data-alt="User profile avatar placeholder"], img[data-alt="Avatar de usuario perfil moderno"]');
+        allAvatars.forEach(img => {
+            img.src = savedAvatar;
+        });
+    }
+
+    if (profileUpload && profileAvatar) {
+        profileUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const dataUrl = event.target.result;
+                    // Save to local storage
+                    localStorage.setItem('userAvatar', dataUrl);
+                    // Update all avatars on current page instantly
+                    const allAvatars = document.querySelectorAll('img[data-alt="User profile avatar"], img[data-alt="User profile avatar placeholder"], img[data-alt="Avatar de usuario perfil moderno"]');
+                    allAvatars.forEach(img => {
+                        img.src = dataUrl;
+                    });
+                };
+                reader.readAsDataURL(file);
             }
         });
     }

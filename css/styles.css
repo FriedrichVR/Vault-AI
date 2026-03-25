@@ -1,8 +1,21 @@
 /* Finance AI - Custom Styles for MVP */
 /* Note: Core styles are handled via Tailwind CDN, putting custom overrides here */
 
+:root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 body {
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    padding-top: var(--safe-top);
 }
 
 /* Material symbols variation for filled icons */
@@ -10,13 +23,25 @@ body {
     font-variation-settings: 'FILL' 1;
 }
 
-/* Hide scrollbar for clean look */
+/* Hide scrollbar for clean look in mobile views */
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
 .no-scrollbar {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+}
+
+/* Optional safe area padding class for navs */
+.pb-safe {
+    padding-bottom: calc(1.5rem + var(--safe-bottom)) !important;
+}
+.pt-safe {
+    padding-top: calc(0.75rem + var(--safe-top)) !important;
+}
+/* For <main> to clear the extended bottom nav */
+.pb-main-safe {
+    padding-bottom: calc(6rem + var(--safe-bottom)) !important;
 }
 
 /* ==== SIMULADOR DE FORMATO CELULAR EN PC ==== */

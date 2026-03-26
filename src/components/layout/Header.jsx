@@ -15,7 +15,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-border-dark px-4 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-border-dark px-4 pt-safe pb-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
           <span className="material-symbols-outlined text-primary text-xl">account_balance_wallet</span>

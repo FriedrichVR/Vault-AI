@@ -9,8 +9,10 @@ export default function Scan() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  const WEBHOOK_URL = "https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
+  const WEBHOOK_URL = "https://n8n.srv1202174.hstgr.cloud/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
 
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
@@ -19,6 +21,7 @@ export default function Scan() {
     console.log('Archivo seleccionado:', file.name, file.type, file.size);
     setIsProcessing(true);
     setProgress(10);
+    setNotification(null);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -31,7 +34,6 @@ export default function Scan() {
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         body: formData,
-        // No añadimos Content-Type manual para que el navegador ponga el boundary correcto
       });
 
       console.log('Respuesta recibida:', response.status);
@@ -41,20 +43,21 @@ export default function Scan() {
         setProgress(100);
         setTimeout(() => {
           setIsProcessing(false);
-          alert('¡Factura enviada con éxito! N8N la está procesando.');
-          navigate('/');
-        }, 500);
+          setShowSuccess(true);
+        }, 800);
       } else {
         const errorText = await response.text();
         throw new Error(errorText || 'Error en el servidor N8N');
       }
     } catch (error) {
       console.error('Error detallado:', error);
-      alert('Hubo un problema al enviar la factura. Verifica tu conexión o el estado de N8N.');
+      setNotification({ 
+        type: 'error', 
+        message: 'Hubo un problema al enviar la factura. Verifica tu conexión o el estado de N8N.' 
+      });
       setIsProcessing(false);
       setProgress(0);
     } finally {
-      // Limpiar los inputs para permitir seleccionar el mismo archivo de nuevo si falla
       if (galleryInputRef.current) galleryInputRef.current.value = '';
       if (cameraInputRef.current) cameraInputRef.current.value = '';
     }
@@ -82,7 +85,7 @@ export default function Scan() {
       />
 
       {/* Header */}
-      <div className="z-20 flex items-center bg-transparent p-4 justify-between backdrop-blur-md border-b border-white/5">
+      <div className="z-20 flex items-center bg-transparent px-4 pt-safe pb-4 justify-between backdrop-blur-md border-b border-white/5">
         <button 
           onClick={() => navigate(-1)} 
           className="text-slate-100 flex size-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
@@ -123,7 +126,7 @@ export default function Scan() {
       </div>
 
       {/* Controls */}
-      <div className="z-20 flex flex-col gap-6 bg-background-light dark:bg-background-dark p-6 pt-8 pb-8 border-t border-white/5 rounded-t-3xl shadow-2xl">
+      <div className="z-20 flex flex-col gap-6 bg-background-light dark:bg-background-dark p-6 pt-8 pb-safe border-t border-white/5 rounded-t-3xl shadow-2xl">
         {isProcessing ? (
           <div className="w-full">
             <div className="flex flex-col gap-3">
@@ -197,6 +200,58 @@ export default function Scan() {
                 <button type="submit" className="px-5 py-2.5 font-medium bg-primary text-white rounded-lg shadow-lg">Guardar</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Notification Toast */}
+      {notification && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] w-[90%] max-w-sm animate-scale-in">
+          <div className={`flex items-center gap-3 p-4 rounded-2xl shadow-2xl backdrop-blur-xl border ${
+            notification.type === 'success' 
+              ? 'bg-emerald-500/90 border-emerald-400/20 text-white' 
+              : 'bg-rose-500/90 border-rose-400/20 text-white'
+          }`}>
+            <div className="size-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined">
+                {notification.type === 'success' ? 'check_circle' : 'error'}
+              </span>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold leading-tight">{notification.type === 'success' ? 'Éxito' : 'Error'}</p>
+              <p className="text-[11px] opacity-90 mt-0.5">{notification.message}</p>
+            </div>
+            <button 
+              onClick={() => setNotification(null)}
+              className="size-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <span className="material-symbols-outlined text-sm">close</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Full Screen Success Overlay */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-[300] bg-background-light dark:bg-background-dark flex flex-col items-center justify-center p-8 animate-fade-in">
+          <div className="flex flex-col items-center max-w-xs text-center">
+            {/* Animated Checkmark Circle */}
+            <div className="size-24 rounded-full bg-primary/10 flex items-center justify-center mb-8 animate-scale-in">
+              <div className="size-16 rounded-full bg-primary flex items-center justify-center shadow-[0_0_30px_rgba(13,13,242,0.4)]">
+                <span className="material-symbols-outlined !text-4xl text-white">check</span>
+              </div>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 animate-slide-up delay-100">¡Envío Exitoso!</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-12 animate-slide-up delay-200">
+              La factura ha sido enviada correctamente a <span className="text-primary font-bold">N8N</span> y está siendo procesada por la IA.
+            </p>
+            
+            <button 
+              onClick={() => navigate('/')}
+              className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all animate-slide-up delay-300"
+            >
+              Volver al Inicio
+            </button>
           </div>
         </div>
       )}

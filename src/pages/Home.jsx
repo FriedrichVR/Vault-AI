@@ -3,16 +3,52 @@ import { useState, useEffect } from 'react';
 export default function Home() {
   const [currentDate, setCurrentDate] = useState('');
 
+  const [activePeriod, setActivePeriod] = useState('1s');
+
+  const chartData = {
+    '1s': [
+      { label: 'Lun', height: '35%', active: false },
+      { label: 'Mar', height: '60%', active: false },
+      { label: 'Mié', height: '40%', active: false },
+      { label: 'Jue', height: '85%', active: true },
+      { label: 'Vie', height: '50%', active: false },
+      { label: 'Sáb', height: '25%', active: false },
+      { label: 'Dom', height: '15%', active: false },
+    ],
+    '1m': [
+      { label: 'Sem 1', height: '45%', active: false },
+      { label: 'Sem 2', height: '75%', active: false },
+      { label: 'Sem 3', height: '90%', active: true },
+      { label: 'Sem 4', height: '60%', active: false },
+    ],
+    '1a': [
+      { label: 'E', height: '40%', active: false },
+      { label: 'F', height: '30%', active: false },
+      { label: 'M', height: '65%', active: false },
+      { label: 'A', height: '45%', active: false },
+      { label: 'M', height: '80%', active: false },
+      { label: 'J', height: '35%', active: false },
+      { label: 'J', height: '55%', active: false },
+      { label: 'A', height: '60%', active: false },
+      { label: 'S', height: '90%', active: true },
+      { label: 'O', height: '70%', active: false },
+      { label: 'N', height: '65%', active: false },
+      { label: 'D', height: '50%', active: false },
+    ]
+  };
+
   useEffect(() => {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const date = new Date().toLocaleDateString('es-ES', options);
     setCurrentDate(date.charAt(0).toUpperCase() + date.slice(1));
   }, []);
 
+  const currentChart = chartData[activePeriod];
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 animate-fade-in">
       {/* Main Balance Section */}
-      <section className="mb-6">
+      <section className="mb-6 animate-slide-up">
         <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold tracking-[0.15em] mb-1 uppercase">Patrimonio Neto Consolidado</p>
         <div className="flex items-baseline gap-2">
           <h1 className="text-[32px] font-bold tracking-tight text-slate-900 dark:text-white">$428,942<span className="text-slate-500 dark:text-slate-400">.85</span></h1>
@@ -23,7 +59,7 @@ export default function Home() {
       </section>
 
       {/* Flow Overview Card */}
-      <section className="mb-6">
+      <section className="mb-6 animate-slide-up delay-100">
         <div className="p-5 rounded-2xl bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark shadow-lg">
           <h2 className="text-[10px] font-bold tracking-[0.1em] text-slate-500 dark:text-slate-400 mb-5 uppercase">Resumen de Flujo</h2>
 
@@ -56,7 +92,7 @@ export default function Home() {
       </section>
 
       {/* Spending Trends Card */}
-      <section className="mb-8">
+      <section className="mb-8 animate-slide-up delay-200">
         <div className="px-2">
           {/* Header Area */}
           <div className="flex items-start justify-between mb-8">
@@ -67,59 +103,76 @@ export default function Home() {
                 {currentDate}
               </span>
             </div>
-            {/* Time Toggles */}
+            {/* Time Toggles - Modern Pill Style */}
             <div className="flex flex-col items-end gap-1.5">
-              <div id="chart-toggles" className="flex gap-1.5 bg-white dark:bg-surface-dark p-1 rounded-xl">
-                <button data-period="1s" className="text-slate-500 dark:text-slate-400 text-xs font-medium px-3 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-200 dark:hover:text-white dark:hover:bg-white/5 transition-colors">1S</button>
-                <button data-period="1m" className="bg-primary text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-[0_4px_10px_rgba(13,13,242,0.3)]">1M</button>
-                <button data-period="1a" className="text-slate-500 dark:text-slate-400 text-xs font-medium px-3 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-200 dark:hover:text-white dark:hover:bg-white/5 transition-colors">1A</button>
+              <div id="chart-toggles" className="flex gap-1 p-1.5 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5">
+                {['1s', '1m', '1a'].map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => setActivePeriod(period)}
+                    className={`${
+                      activePeriod === period
+                        ? 'bg-primary text-white'
+                        : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-white/5'
+                    } text-[10px] font-bold px-4 py-2 rounded-xl transition-all duration-300 uppercase tracking-wider`}
+                  >
+                    {period}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
           
-          {/* Bar Chart */}
-          <div id="chart-container" className="flex items-end justify-between h-48 w-full gap-2 transition-opacity duration-300">
-            {/* LUN */}
-            <div className="flex flex-col items-center justify-end flex-1 gap-3 h-full">
-              <div className="w-full bg-slate-200 hover:bg-slate-300 dark:bg-[#1e1e2d] dark:hover:bg-[#252538] transition-colors rounded-md relative" style={{ height: '35%' }}></div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase">Lun</span>
+          {/* Bar Chart Section - Card Like Container */}
+          <div className="relative mt-2 p-6 rounded-3xl bg-white dark:bg-surface-dark/40 shadow-sm border border-slate-100 dark:border-white/[0.02]">
+            {/* Grid Reference Lines */}
+            <div className="absolute inset-x-0 inset-y-0 flex flex-col justify-between pointer-events-none pr-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="w-full border-t border-slate-100 dark:border-white/5 h-0"></div>
+              ))}
+              <div className="w-full h-0"></div> {/* Bottom line */}
             </div>
-            {/* MAR */}
-            <div className="flex flex-col items-center justify-end flex-1 gap-3 h-full">
-              <div className="w-full bg-slate-200 hover:bg-slate-300 dark:bg-[#1e1e2d] dark:hover:bg-[#252538] transition-colors rounded-md relative" style={{ height: '60%' }}></div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase">Mar</span>
-            </div>
-            {/* MIÉ */}
-            <div className="flex flex-col items-center justify-end flex-1 gap-3 h-full">
-              <div className="w-full bg-slate-200 hover:bg-slate-300 dark:bg-[#1e1e2d] dark:hover:bg-[#252538] transition-colors rounded-md relative" style={{ height: '40%' }}></div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase">Mié</span>
-            </div>
-            {/* JUE (Active) */}
-            <div className="flex flex-col items-center justify-end flex-1 gap-3 h-full">
-              <div className="w-full bg-primary rounded-md relative shadow-[0_0_20px_rgba(13,13,242,0.4)] z-10" style={{ height: '85%' }}></div>
-              <span className="text-[10px] font-bold text-primary uppercase">Jue</span>
-            </div>
-            {/* VIE */}
-            <div className="flex flex-col items-center justify-end flex-1 gap-3 h-full">
-              <div className="w-full bg-slate-200 hover:bg-slate-300 dark:bg-[#1e1e2d] dark:hover:bg-[#252538] transition-colors rounded-md relative" style={{ height: '50%' }}></div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase">Vie</span>
-            </div>
-            {/* SÁB */}
-            <div className="flex flex-col items-center justify-end flex-1 gap-3 h-full">
-              <div className="w-full bg-slate-200 hover:bg-slate-300 dark:bg-[#1e1e2d] dark:hover:bg-[#252538] transition-colors rounded-md relative" style={{ height: '25%' }}></div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase">Sáb</span>
-            </div>
-            {/* DOM */}
-            <div className="flex flex-col items-center justify-end flex-1 gap-3 h-full">
-              <div className="w-full bg-slate-200 hover:bg-slate-300 dark:bg-[#1e1e2d] dark:hover:bg-[#252538] transition-colors rounded-md relative" style={{ height: '15%' }}></div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase">Dom</span>
+
+            {/* Bars Container */}
+            <div id="chart-container" className="relative flex items-end justify-between h-48 w-full gap-2 pt-8">
+              {currentChart.map((bar, index) => (
+                <div key={index} className="group flex flex-col items-center justify-end flex-1 gap-3 h-full relative">
+                  {/* Tooltip on Hover */}
+                  <div className="absolute -top-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-20 pointer-events-none">
+                    <div className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-bold px-2 py-1 rounded shadow-xl whitespace-nowrap">
+                      {bar.height.replace('%', '') * 10} USD
+                    </div>
+                  </div>
+
+                  {/* Bar */}
+                  <div 
+                    className={`w-full max-w-[18px] rounded-sm relative ${
+                      bar.active 
+                        ? 'bg-primary z-10' 
+                        : 'bg-slate-200/50 dark:bg-[#1e1e2d]/60'
+                    }`} 
+                    style={{ 
+                      height: bar.height
+                    }}
+                  >
+                  </div>
+
+                  {/* Label */}
+                  <span className={`text-[9px] font-bold uppercase tracking-tighter ${
+                    bar.active ? 'text-primary' : 'text-slate-400 dark:text-slate-500'
+                  }`}>
+                    {bar.label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
+
       {/* Monthly Budgets */}
-      <section className="mb-6">
+      <section className="mb-6 animate-slide-up delay-300">
         <div className="flex items-center justify-between mb-4 px-1">
           <h2 className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Presupuestos Mensuales</h2>
           <button className="text-primary text-[9px] font-bold uppercase tracking-wider">Ver Todos</button>
@@ -168,7 +221,7 @@ export default function Home() {
       </section>
 
       {/* Recent Activity */}
-      <section className="mb-8">
+      <section className="mb-8 animate-slide-up delay-400">
         <div className="flex items-center justify-between mb-4 px-1">
           <h2 className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Actividad Reciente</h2>
           <button className="text-primary text-[9px] font-bold uppercase tracking-wider">Historial</button>

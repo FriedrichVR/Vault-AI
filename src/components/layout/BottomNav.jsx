@@ -31,14 +31,20 @@ export default function BottomNav() {
             <NavLink
               key={tab.name}
               to={tab.path}
-              className={({ isActive }) => `flex flex-col items-center gap-1 group ${isActive ? '' : ''}`}
+              className={({ isActive }) => `flex flex-col items-center gap-1 group active:scale-95 transition-transform ${isActive ? '' : ''}`}
             >
               {({ isActive }) => (
                 <>
-                  <span className={`material-symbols-outlined transition-colors ${isActive ? 'text-primary fill-active' : 'text-slate-500 group-hover:text-primary'}`}>
+                  <span className={`material-symbols-outlined transition-all duration-300 ${
+                    isActive 
+                      ? 'text-primary fill-active scale-110' 
+                      : 'text-slate-500 group-hover:text-primary'
+                  }`}>
                     {tab.icon}
                   </span>
-                  <span className={`text-[10px] font-medium ${isActive ? 'text-primary' : 'text-slate-500 group-hover:text-primary'}`}>
+                  <span className={`text-[10px] font-medium transition-colors duration-300 ${
+                    isActive ? 'text-primary' : 'text-slate-500 group-hover:text-primary'
+                  }`}>
                     {tab.name}
                   </span>
                 </>

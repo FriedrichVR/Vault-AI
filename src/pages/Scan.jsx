@@ -10,7 +10,7 @@ export default function Scan() {
   const [progress, setProgress] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
-  const WEBHOOK_URL = "https://n8n.srv1202174.hstgr.cloud/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
+  const WEBHOOK_URL = "https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
 
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];

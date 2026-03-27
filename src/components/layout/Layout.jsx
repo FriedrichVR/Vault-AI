@@ -4,7 +4,7 @@ import BottomNav from './BottomNav';
 
 export default function Layout() {
   const location = useLocation();
-  const hideNav = location.pathname === '/escaneo';
+  const hideNav = location.pathname === '/escaneo' || location.pathname === '/asistente';
   
   return (
     <div className="flex flex-col flex-1 h-full w-full">

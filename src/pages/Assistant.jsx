@@ -64,7 +64,7 @@ export default function Assistant() {
     formData.append('sessionId', 'user-vault-ai');
 
     const url = import.meta.env.DEV 
-      ? "/api-n8n/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d"
+      ? "/api-n8n/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d"
       : "https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
 
     try {
@@ -110,7 +110,7 @@ export default function Assistant() {
     setIsLoading(true);
 
     const url = import.meta.env.DEV
-      ? "/api-n8n/webhook-test/c2086702-3663-46a7-8ed7-421446f4fd6c/chat"
+      ? "/api-n8n/webhook/c2086702-3663-46a7-8ed7-421446f4fd6c/chat"
       : "https://n8n.srv1202174.hstgr.cloud/webhook/c2086702-3663-46a7-8ed7-421446f4fd6c/chat";
 
     try {

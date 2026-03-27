@@ -238,6 +238,13 @@ export default function Scan() {
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Monto</label>
                 <input name="amount" type="number" placeholder="0.00" step="0.01" className="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 outline-none" required />
               </div>
+              <div className="flex flex-col gap-1.5 text-left">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Tipo de Movimiento</label>
+                <select name="movement_type" className="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 outline-none appearance-none cursor-pointer" required>
+                  <option value="gasto">Gasto 🔻</option>
+                  <option value="ingreso">Ingreso 🔺</option>
+                </select>
+              </div>
               <div className="flex justify-end gap-3 mt-4">
                 <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 font-medium bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-200 rounded-lg">Cancelar</button>
                 <button type="submit" className="px-5 py-2.5 font-medium bg-primary text-white rounded-lg shadow-lg">Guardar</button>

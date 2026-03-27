@@ -40,6 +40,42 @@ export default function Assistant() {
     return () => window.removeEventListener('avatarUpdate', handleUpdate);
   }, [avatar]);
 
+  const handlePlusClick = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'plus_click', sessionId: 'user-vault-ai' })
+      });
+      
+      const text = await response.text();
+      if (!text) return; // Ignore if webhook gives empty response
+      
+      let finalOutput = text;
+      try {
+        const json = JSON.parse(text);
+        finalOutput = json.output || json.text || json.message || json.chatOutput || text;
+      } catch(e) {}
+
+      if (finalOutput) {
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          role: 'assistant',
+          content: finalOutput
+        }]);
+      }
+    } catch (error) {
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        role: 'assistant',
+        content: 'Error al conectar con el webhook (+) de n8n.'
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim()) return;
     
@@ -85,14 +121,16 @@ export default function Assistant() {
 
   return (
     <div className="flex flex-col min-h-full -mt-6 -mx-4 relative">
-      {/* Botón Flotante Superior */}
-      <div className="fixed top-4 left-4 z-[60]">
-        <button 
-          onClick={() => navigate('/')} 
-          className="p-2 rounded-full bg-slate-200/80 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center justify-center backdrop-blur-lg shadow-lg border border-white/30 dark:border-slate-600"
-        >
-          <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-        </button>
+      {/* Botón Flotante Superior (Sticky en lugar de Fixed para evitar scroll con contenedores transformados) */}
+      <div className="sticky top-0 z-[60] w-full h-0">
+        <div className="absolute top-4 left-4">
+          <button 
+            onClick={() => navigate('/')} 
+            className="p-2 rounded-full bg-slate-200/80 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center justify-center backdrop-blur-lg shadow-lg border border-white/30 dark:border-slate-600"
+          >
+            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+          </button>
+        </div>
       </div>
 
       {/* Contenedor Principal (pb-40 para que nada quede trabado abajo) */}
@@ -170,7 +208,12 @@ export default function Assistant() {
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] p-1.5 rounded-full flex items-center gap-2 transition-all focus-within:ring-2 focus-within:ring-primary/50">
             <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex flex-1 items-center gap-2">
-              <button type="button" className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors flex items-center justify-center shrink-0">
+              <button 
+                type="button" 
+                onClick={handlePlusClick}
+                disabled={isLoading}
+                className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors flex items-center justify-center shrink-0 disabled:opacity-50"
+              >
                 <span className="material-symbols-outlined text-xl">add_circle</span>
               </button>
               

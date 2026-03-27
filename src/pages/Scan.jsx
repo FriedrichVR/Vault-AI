@@ -13,7 +13,9 @@ export default function Scan() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(null); // String con el mensaje de error
 
-  const WEBHOOK_URL = "https://n8n.srv1202174.hstgr.cloud/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
+  const WEBHOOK_URL = import.meta.env.DEV 
+    ? "/api-n8n/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d"
+    : "https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
 
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
@@ -248,8 +250,8 @@ export default function Scan() {
       {notification && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] w-[90%] max-w-sm animate-scale-in">
           <div className={`flex items-center gap-3 p-4 rounded-2xl shadow-2xl backdrop-blur-xl border ${notification.type === 'success'
-              ? 'bg-emerald-500/90 border-emerald-400/20 text-white'
-              : 'bg-rose-500/90 border-rose-400/20 text-white'
+            ? 'bg-emerald-500/90 border-emerald-400/20 text-white'
+            : 'bg-rose-500/90 border-rose-400/20 text-white'
             }`}>
             <div className="size-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined">

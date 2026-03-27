@@ -5,7 +5,7 @@ export default function Scan() {
   const navigate = useNavigate();
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
-  
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showModal, setShowModal] = useState(false);
@@ -13,7 +13,7 @@ export default function Scan() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(null); // String con el mensaje de error
 
-  const WEBHOOK_URL = "https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
+  const WEBHOOK_URL = "https://n8n.srv1202174.hstgr.cloud/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
 
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
@@ -31,7 +31,7 @@ export default function Scan() {
     try {
       setProgress(30);
       console.log('Enviando a N8N...');
-      
+
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         body: formData,
@@ -65,7 +65,7 @@ export default function Scan() {
     e.preventDefault();
     const formDataRaw = new FormData(e.target);
     const data = Object.fromEntries(formDataRaw.entries());
-    
+
     setIsProcessing(true);
     setProgress(20);
     setShowModal(false);
@@ -74,13 +74,13 @@ export default function Scan() {
     try {
       console.log('Enviando carga manual a N8N...', data);
       setProgress(50);
-      
+
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           type: 'manual',
-          ...data 
+          ...data
         }),
       });
 
@@ -107,28 +107,28 @@ export default function Scan() {
   return (
     <div className="fixed inset-0 bg-background-light dark:bg-background-dark z-[100] flex flex-col overflow-hidden">
       {/* Input para Galería (Imágenes y PDFs) */}
-      <input 
-        type="file" 
-        ref={galleryInputRef} 
-        onChange={handleFileSelect} 
-        accept="image/*,application/pdf" 
-        className="hidden" 
+      <input
+        type="file"
+        ref={galleryInputRef}
+        onChange={handleFileSelect}
+        accept="image/*,application/pdf"
+        className="hidden"
       />
 
       {/* Input para Cámara (Directo) */}
-      <input 
-        type="file" 
-        ref={cameraInputRef} 
-        onChange={handleFileSelect} 
-        accept="image/*" 
+      <input
+        type="file"
+        ref={cameraInputRef}
+        onChange={handleFileSelect}
+        accept="image/*"
         capture="environment"
-        className="hidden" 
+        className="hidden"
       />
 
       {/* Header */}
       <div className="z-20 flex items-center bg-transparent px-4 pt-safe pb-4 justify-between backdrop-blur-md border-b border-white/5">
-        <button 
-          onClick={() => navigate(-1)} 
+        <button
+          onClick={() => navigate(-1)}
           className="text-slate-100 flex size-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
         >
           <span className="material-symbols-outlined">close</span>
@@ -144,13 +144,13 @@ export default function Scan() {
       {/* Viewfinder Area */}
       <div className="relative flex-1 bg-neutral-900 overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 opacity-40">
-          <img 
-            alt="Fondo de cámara" 
-            className="w-full h-full object-cover" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvzNhIt9_Y8pDqFhsbPkJEhIb5hiQO2dxbM3tibreeTynsTlm5Fnqo45HdjV5QSmljW1Kj5N9h59e2Mrxft4vcLX8ycH6QqzTqVsrLSz-uVcpUr0WkLLRBr9F_7TmYAlHQIQxKDMqbroRFMY7Avt3WspvbPOtiLXv6y9taxHqxmmMjrAI0lXaSsQDVfkYbQpC6XsU-sDIb9UBOPXSjJkNUxIEJC-8kUDNU_qcobNmRVNFmqJqbS0wjr0D1nPVjv0bH8tyYXsW4MPA" 
+          <img
+            alt="Fondo de cámara"
+            className="w-full h-full object-cover"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvzNhIt9_Y8pDqFhsbPkJEhIb5hiQO2dxbM3tibreeTynsTlm5Fnqo45HdjV5QSmljW1Kj5N9h59e2Mrxft4vcLX8ycH6QqzTqVsrLSz-uVcpUr0WkLLRBr9F_7TmYAlHQIQxKDMqbroRFMY7Avt3WspvbPOtiLXv6y9taxHqxmmMjrAI0lXaSsQDVfkYbQpC6XsU-sDIb9UBOPXSjJkNUxIEJC-8kUDNU_qcobNmRVNFmqJqbS0wjr0D1nPVjv0bH8tyYXsW4MPA"
           />
         </div>
-        
+
         <div className="relative w-4/5 h-3/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-[2px]">
           <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-primary rounded-tl-lg"></div>
           <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-primary rounded-tr-lg"></div>
@@ -186,7 +186,7 @@ export default function Scan() {
         ) : (
           <div className="flex items-end justify-between px-6 pb-2">
             <div className="flex flex-col items-center gap-2">
-              <button 
+              <button
                 onClick={() => galleryInputRef.current.click()}
                 className="flex shrink-0 items-center justify-center rounded-full size-12 bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-100 hover:bg-white/10 transition-colors"
               >
@@ -194,9 +194,9 @@ export default function Scan() {
               </button>
               <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Galería</span>
             </div>
-            
+
             <div className="flex flex-col items-center gap-2">
-              <button 
+              <button
                 onClick={() => cameraInputRef.current.click()}
                 className="flex shrink-0 items-center justify-center rounded-full size-20 bg-primary shadow-[0_0_30px_-5px_rgba(13,13,242,0.6)] text-white hover:scale-105 transition-transform"
               >
@@ -204,9 +204,9 @@ export default function Scan() {
               </button>
               <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Escanear</span>
             </div>
-            
+
             <div className="flex flex-col items-center gap-2">
-              <button 
+              <button
                 onClick={() => setShowModal(true)}
                 className="flex shrink-0 items-center justify-center rounded-full size-12 bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-100 hover:bg-white/10 transition-colors"
               >
@@ -247,11 +247,10 @@ export default function Scan() {
       {/* Notification Toast */}
       {notification && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] w-[90%] max-w-sm animate-scale-in">
-          <div className={`flex items-center gap-3 p-4 rounded-2xl shadow-2xl backdrop-blur-xl border ${
-            notification.type === 'success' 
-              ? 'bg-emerald-500/90 border-emerald-400/20 text-white' 
+          <div className={`flex items-center gap-3 p-4 rounded-2xl shadow-2xl backdrop-blur-xl border ${notification.type === 'success'
+              ? 'bg-emerald-500/90 border-emerald-400/20 text-white'
               : 'bg-rose-500/90 border-rose-400/20 text-white'
-          }`}>
+            }`}>
             <div className="size-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined">
                 {notification.type === 'success' ? 'check_circle' : 'error'}
@@ -261,7 +260,7 @@ export default function Scan() {
               <p className="text-sm font-bold leading-tight">{notification.type === 'success' ? 'Éxito' : 'Error'}</p>
               <p className="text-[11px] opacity-90 mt-0.5">{notification.message}</p>
             </div>
-            <button 
+            <button
               onClick={() => setNotification(null)}
               className="size-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
             >
@@ -281,13 +280,13 @@ export default function Scan() {
                 <span className="material-symbols-outlined !text-4xl text-white">check</span>
               </div>
             </div>
-            
+
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 animate-slide-up delay-100">¡Envío Exitoso!</h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm mb-12 animate-slide-up delay-200">
               La factura ha sido enviada correctamente a <span className="text-primary font-bold">N8N</span> y está siendo procesada por la IA.
             </p>
-            
-            <button 
+
+            <button
               onClick={() => navigate('/')}
               className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all animate-slide-up delay-300"
             >
@@ -307,20 +306,20 @@ export default function Scan() {
                 <span className="material-symbols-outlined !text-4xl text-white">warning</span>
               </div>
             </div>
-            
+
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 animate-slide-up delay-100">Algo salió mal</h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm mb-12 animate-slide-up delay-200">
               {showError}
             </p>
-            
+
             <div className="flex flex-col w-full gap-3 animate-slide-up delay-300">
-              <button 
+              <button
                 onClick={() => setShowError(null)}
                 className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all"
               >
                 Reintentar
               </button>
-              <button 
+              <button
                 onClick={() => navigate('/')}
                 className="w-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 py-4 rounded-2xl font-bold active:scale-95 transition-all"
               >

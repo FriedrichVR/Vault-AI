@@ -11,6 +11,7 @@ export default function Scan() {
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(null); // String con el mensaje de error
 
   const WEBHOOK_URL = "https://n8n.srv1202174.hstgr.cloud/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
 
@@ -51,15 +52,55 @@ export default function Scan() {
       }
     } catch (error) {
       console.error('Error detallado:', error);
-      setNotification({ 
-        type: 'error', 
-        message: 'Hubo un problema al enviar la factura. Verifica tu conexión o el estado de N8N.' 
-      });
       setIsProcessing(false);
       setProgress(0);
+      setShowError(error.message || 'Hubo un problema al enviar la factura. Verifica tu conexión.');
     } finally {
       if (galleryInputRef.current) galleryInputRef.current.value = '';
       if (cameraInputRef.current) cameraInputRef.current.value = '';
+    }
+  };
+
+  const handleManualSubmit = async (e) => {
+    e.preventDefault();
+    const formDataRaw = new FormData(e.target);
+    const data = Object.fromEntries(formDataRaw.entries());
+    
+    setIsProcessing(true);
+    setProgress(20);
+    setShowModal(false);
+    setNotification(null);
+
+    try {
+      console.log('Enviando carga manual a N8N...', data);
+      setProgress(50);
+      
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          type: 'manual',
+          ...data 
+        }),
+      });
+
+      console.log('Respuesta recibida:', response.status);
+      setProgress(100);
+
+      if (response.ok) {
+        setTimeout(() => {
+          setIsProcessing(false);
+          setShowSuccess(true);
+        }, 800);
+      } else {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error en el servidor N8N');
+      }
+    } catch (error) {
+      console.error('Error detallado:', error);
+      setIsProcessing(false);
+      setProgress(0);
+      setShowError(error.message || 'Hubo un problema al enviar la carga manual. Verifica tu conexión.');
     }
   };
 
@@ -182,18 +223,18 @@ export default function Scan() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[110] p-4">
           <div className="bg-background-light dark:bg-background-dark rounded-xl p-6 w-full max-w-md shadow-2xl border border-white/10">
             <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">Cargar manualmente</h3>
-            <form className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); setShowModal(false); navigate('/'); }}>
+            <form className="flex flex-col gap-4" onSubmit={handleManualSubmit}>
               <div className="flex flex-col gap-1.5 text-left">
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Proveedor</label>
-                <input type="text" placeholder="Ej. Supermercado" className="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 outline-none" required />
+                <input name="provider" type="text" placeholder="Ej. Supermercado" className="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 outline-none" required />
               </div>
               <div className="flex flex-col gap-1.5 text-left">
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Fecha</label>
-                <input type="date" className="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 outline-none" required />
+                <input name="date" type="date" className="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 outline-none" required />
               </div>
               <div className="flex flex-col gap-1.5 text-left">
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Monto</label>
-                <input type="number" placeholder="0.00" step="0.01" className="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 outline-none" required />
+                <input name="amount" type="number" placeholder="0.00" step="0.01" className="px-4 py-3 border border-slate-200 dark:border-white/10 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-slate-100 outline-none" required />
               </div>
               <div className="flex justify-end gap-3 mt-4">
                 <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 font-medium bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-200 rounded-lg">Cancelar</button>
@@ -252,6 +293,40 @@ export default function Scan() {
             >
               Volver al Inicio
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Full Screen Error Overlay */}
+      {showError && (
+        <div className="fixed inset-0 z-[305] bg-background-light dark:bg-background-dark flex flex-col items-center justify-center p-8 animate-fade-in">
+          <div className="flex flex-col items-center max-w-xs text-center">
+            {/* Animated Error Circle */}
+            <div className="size-24 rounded-full bg-rose-500/10 flex items-center justify-center mb-8 animate-scale-in">
+              <div className="size-16 rounded-full bg-rose-500 flex items-center justify-center shadow-[0_0_30px_rgba(244,63,94,0.4)]">
+                <span className="material-symbols-outlined !text-4xl text-white">warning</span>
+              </div>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 animate-slide-up delay-100">Algo salió mal</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-12 animate-slide-up delay-200">
+              {showError}
+            </p>
+            
+            <div className="flex flex-col w-full gap-3 animate-slide-up delay-300">
+              <button 
+                onClick={() => setShowError(null)}
+                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all"
+              >
+                Reintentar
+              </button>
+              <button 
+                onClick={() => navigate('/')}
+                className="w-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 py-4 rounded-2xl font-bold active:scale-95 transition-all"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}

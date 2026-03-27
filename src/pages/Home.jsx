@@ -1,41 +1,35 @@
 import { useState, useEffect } from 'react';
 
+// Static Data moved outside component to prevent re-creation on render
+const CHART_DATA = {
+  '1s': [
+    { label: 'Lun', height: '35%', active: false },
+    { label: 'Mar', height: '60%', active: false },
+    { label: 'Mié', height: '40%', active: false },
+    { label: 'Jue', height: '85%', active: true },
+    { label: 'Vie', height: '50%', active: false },
+    { label: 'Sáb', height: '25%', active: false },
+    { label: 'Dom', height: '15%', active: false },
+  ],
+  '1m': [
+    { label: 'Sem 1', height: '45%', active: false },
+    { label: 'Sem 2', height: '75%', active: false },
+    { label: 'Sem 3', height: '90%', active: true },
+    { label: 'Sem 4', height: '60%', active: false },
+  ],
+  '1a': [
+    { label: 'E', height: '40%', active: false }, { label: 'F', height: '30%', active: false },
+    { label: 'M', height: '65%', active: false }, { label: 'A', height: '45%', active: false },
+    { label: 'M', height: '80%', active: false }, { label: 'J', height: '35%', active: false },
+    { label: 'J', height: '55%', active: false }, { label: 'A', height: '60%', active: false },
+    { label: 'S', height: '90%', active: true }, { label: 'O', height: '70%', active: false },
+    { label: 'N', height: '65%', active: false }, { label: 'D', height: '50%', active: false },
+  ]
+};
+
 export default function Home() {
   const [currentDate, setCurrentDate] = useState('');
-
   const [activePeriod, setActivePeriod] = useState('1s');
-
-  const chartData = {
-    '1s': [
-      { label: 'Lun', height: '35%', active: false },
-      { label: 'Mar', height: '60%', active: false },
-      { label: 'Mié', height: '40%', active: false },
-      { label: 'Jue', height: '85%', active: true },
-      { label: 'Vie', height: '50%', active: false },
-      { label: 'Sáb', height: '25%', active: false },
-      { label: 'Dom', height: '15%', active: false },
-    ],
-    '1m': [
-      { label: 'Sem 1', height: '45%', active: false },
-      { label: 'Sem 2', height: '75%', active: false },
-      { label: 'Sem 3', height: '90%', active: true },
-      { label: 'Sem 4', height: '60%', active: false },
-    ],
-    '1a': [
-      { label: 'E', height: '40%', active: false },
-      { label: 'F', height: '30%', active: false },
-      { label: 'M', height: '65%', active: false },
-      { label: 'A', height: '45%', active: false },
-      { label: 'M', height: '80%', active: false },
-      { label: 'J', height: '35%', active: false },
-      { label: 'J', height: '55%', active: false },
-      { label: 'A', height: '60%', active: false },
-      { label: 'S', height: '90%', active: true },
-      { label: 'O', height: '70%', active: false },
-      { label: 'N', height: '65%', active: false },
-      { label: 'D', height: '50%', active: false },
-    ]
-  };
 
   useEffect(() => {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -43,7 +37,7 @@ export default function Home() {
     setCurrentDate(date.charAt(0).toUpperCase() + date.slice(1));
   }, []);
 
-  const currentChart = chartData[activePeriod];
+  const currentChart = CHART_DATA[activePeriod];
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">

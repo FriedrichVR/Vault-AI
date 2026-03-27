@@ -14,7 +14,7 @@ export default function Scan() {
   const [showError, setShowError] = useState(null); // String con el mensaje de error
 
   const WEBHOOK_URL = import.meta.env.DEV 
-    ? "/api-n8n/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d"
+    ? "/api-n8n/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d"
     : "https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
 
   const handleFileSelect = async (e) => {

@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 export default function Assistant() {
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState(
-    localStorage.getItem('userAvatar') || 
+    localStorage.getItem('userAvatar') ||
     "https://lh3.googleusercontent.com/aida-public/AB6AXuDKFeVTPWLSPgaVLGhnkPXNO3BKiEVny_1TaMamGFpVp-3SF7fFmZ2EjHxs9ayimbsucHyxXRCXKeDcu6CKZsQBRhh2sz-UgPwyIlZLpLLH0xuG-_sTJBjxOBBjNE1Y3o06TC1sCZkT49BK1xYfHCzdKr2iKCDaNxEq3ssTRZUqf-fUdl5PzN4IqqQHR2ZS25lHDi-jk-jXDbTobg4arWCxK4BlR064Xprs-_U6zwor_i1huTWfwfDxNMVnM9urJQJvWvX85cVOAIs"
   );
-  
+
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -63,8 +63,8 @@ export default function Assistant() {
     formData.append('filename', file.name);
     formData.append('sessionId', 'user-vault-ai');
 
-    const url = import.meta.env.DEV 
-      ? "/api-n8n/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d"
+    const url = import.meta.env.DEV
+      ? "/api-n8n/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d"
       : "https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
 
     try {
@@ -72,11 +72,11 @@ export default function Assistant() {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         throw new Error('Mala respuesta del servidor');
       }
-      
+
       await response.text(); // Consume ignoring
 
       setMessages(prev => [...prev, {
@@ -98,13 +98,13 @@ export default function Assistant() {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    
+
     const userMessage = {
       id: Date.now(),
       role: 'user',
       content: input
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -119,13 +119,13 @@ export default function Assistant() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatInput: input, sessionId: 'user-vault-ai' })
       });
-      
+
       const text = await response.text();
       let finalOutput = text;
       try {
         const json = JSON.parse(text);
         finalOutput = json.output || json.text || json.message || json.chatOutput || text;
-      } catch(e) {}
+      } catch (e) { }
 
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
@@ -146,19 +146,19 @@ export default function Assistant() {
   return (
     <div className="flex flex-col min-h-full -mt-6 -mx-4 relative">
       {/* Input Oculto para Galería */}
-      <input 
-        type="file" 
-        ref={galleryInputRef} 
-        onChange={handleFileSelect} 
-        accept="image/*,application/pdf" 
-        className="hidden" 
+      <input
+        type="file"
+        ref={galleryInputRef}
+        onChange={handleFileSelect}
+        accept="image/*,application/pdf"
+        className="hidden"
       />
 
       {/* Botón Flotante Superior (Sticky en lugar de Fixed para evitar scroll con contenedores transformados) */}
       <div className="sticky top-0 z-[60] w-full h-0">
         <div className="absolute top-4 left-4">
-          <button 
-            onClick={() => navigate('/')} 
+          <button
+            onClick={() => navigate('/')}
             className="p-2 rounded-full bg-slate-200/80 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center justify-center backdrop-blur-lg shadow-lg border border-white/30 dark:border-slate-600"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -177,9 +177,9 @@ export default function Assistant() {
               <div className="flex flex-1 flex-col gap-3 items-start">
                 <p className="text-slate-500 dark:text-slate-400 text-xs font-medium px-1 uppercase tracking-wider">Asistente</p>
                 <div className="text-sm font-normal leading-relaxed max-w-[85%] rounded-2xl px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 shadow-sm whitespace-pre-wrap">
-                    {msg.content}
+                  {msg.content}
                 </div>
-                
+
                 {msg.hasGraph && (
                   <div className="w-full max-w-md rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 p-5 shadow-lg">
                     <div className="flex flex-col gap-2 mb-6">
@@ -210,7 +210,7 @@ export default function Assistant() {
               <div className="flex flex-col gap-1 items-end max-w-[80%]">
                 <p className="text-slate-500 dark:text-slate-400 text-xs font-medium px-1 uppercase tracking-wider">Tú</p>
                 <div className="text-sm font-normal leading-relaxed rounded-2xl px-4 py-3 bg-primary text-white shadow-md whitespace-pre-wrap break-words break-all">
-                    {msg.content}
+                  {msg.content}
                 </div>
               </div>
             </div>
@@ -225,9 +225,9 @@ export default function Assistant() {
             <div className="flex flex-col gap-1 items-start">
               <p className="text-slate-500 dark:text-slate-400 text-xs font-medium px-1 uppercase tracking-wider">Asistente</p>
               <div className="text-sm rounded-2xl px-4 py-4 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 flex items-center gap-1">
-                 <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce"></div>
-                 <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                 <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce"></div>
+                <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
               </div>
             </div>
           </div>
@@ -241,30 +241,30 @@ export default function Assistant() {
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] p-1.5 rounded-full flex items-center gap-2 transition-all focus-within:ring-2 focus-within:ring-primary/50">
             <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex flex-1 items-center gap-2">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={handlePlusClick}
                 disabled={isLoading}
                 className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors flex items-center justify-center shrink-0 disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-xl">add_circle</span>
               </button>
-              
-              <input 
+
+              <input
                 ref={inputRef}
                 autoFocus
-                className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-500 py-1 outline-none min-w-0" 
-                placeholder="Escribe un mensaje..." 
+                className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-500 py-1 outline-none min-w-0"
+                placeholder="Escribe un mensaje..."
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={isLoading}
               />
-              
+
               <button type="button" className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-xl">mic</span>
               </button>
-              
+
               <button type="submit" disabled={isLoading || !input.trim()} className="p-1.5 ml-1 aspect-square bg-primary text-white rounded-full shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 disabled:active:scale-100 transition-all flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-[18px]">send</span>
               </button>

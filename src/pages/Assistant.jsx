@@ -63,27 +63,25 @@ export default function Assistant() {
     formData.append('filename', file.name);
     formData.append('sessionId', 'user-vault-ai');
 
+    const url = "https://n8n.srv1202174.hstgr.cloud/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
+
     try {
-      const response = await fetch('https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d', {
+      const response = await fetch(url, {
         method: 'POST',
         body: formData,
       });
       
-      const text = await response.text();
-      let finalOutput = text;
-      
-      try {
-        const json = JSON.parse(text);
-        finalOutput = json.output || json.text || json.message || json.chatOutput || text || 'Documento procesado correctamente.';
-      } catch(err) {}
-
-      if (finalOutput) {
-        setMessages(prev => [...prev, {
-          id: Date.now() + 1,
-          role: 'assistant',
-          content: finalOutput
-        }]);
+      if (!response.ok) {
+        throw new Error('Mala respuesta del servidor');
       }
+      
+      await response.text(); // Consume ignoring
+
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: 'assistant',
+        content: 'Archivo recibido'
+      }]);
     } catch (error) {
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
@@ -109,8 +107,10 @@ export default function Assistant() {
     setInput('');
     setIsLoading(true);
 
+    const url = "https://n8n.srv1202174.hstgr.cloud/webhook-test/c2086702-3663-46a7-8ed7-421446f4fd6c/chat";
+
     try {
-      const response = await fetch('https://n8n.srv1202174.hstgr.cloud/webhook/c2086702-3663-46a7-8ed7-421446f4fd6c/chat', {
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatInput: input, sessionId: 'user-vault-ai' })

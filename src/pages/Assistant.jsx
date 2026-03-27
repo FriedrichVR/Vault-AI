@@ -20,6 +20,7 @@ export default function Assistant() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -40,39 +41,58 @@ export default function Assistant() {
     return () => window.removeEventListener('avatarUpdate', handleUpdate);
   }, [avatar]);
 
-  const handlePlusClick = async () => {
+  const handlePlusClick = () => {
+    galleryInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Mensaje visual de usuario indicando la acción
+    setMessages(prev => [...prev, {
+      id: Date.now(),
+      role: 'user',
+      content: `📁 Enviando documento: ${file.name}`
+    }]);
+
     setIsLoading(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('filename', file.name);
+    formData.append('sessionId', 'user-vault-ai');
+
     try {
       const response = await fetch('https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'plus_click', sessionId: 'user-vault-ai' })
+        body: formData,
       });
       
       const text = await response.text();
-      if (!text) return; // Ignore if webhook gives empty response
-      
       let finalOutput = text;
+      
       try {
         const json = JSON.parse(text);
-        finalOutput = json.output || json.text || json.message || json.chatOutput || text;
-      } catch(e) {}
+        finalOutput = json.output || json.text || json.message || json.chatOutput || text || 'Documento procesado correctamente.';
+      } catch(err) {}
 
       if (finalOutput) {
         setMessages(prev => [...prev, {
-          id: Date.now(),
+          id: Date.now() + 1,
           role: 'assistant',
           content: finalOutput
         }]);
       }
     } catch (error) {
       setMessages(prev => [...prev, {
-        id: Date.now(),
+        id: Date.now() + 1,
         role: 'assistant',
-        content: 'Error al conectar con el webhook (+) de n8n.'
+        content: 'Hubo un error al enviar el documento a n8n. Intenta de nuevo.'
       }]);
     } finally {
       setIsLoading(false);
+      if (galleryInputRef.current) galleryInputRef.current.value = '';
     }
   };
 
@@ -121,6 +141,15 @@ export default function Assistant() {
 
   return (
     <div className="flex flex-col min-h-full -mt-6 -mx-4 relative">
+      {/* Input Oculto para Galería */}
+      <input 
+        type="file" 
+        ref={galleryInputRef} 
+        onChange={handleFileSelect} 
+        accept="image/*,application/pdf" 
+        className="hidden" 
+      />
+
       {/* Botón Flotante Superior (Sticky en lugar de Fixed para evitar scroll con contenedores transformados) */}
       <div className="sticky top-0 z-[60] w-full h-0">
         <div className="absolute top-4 left-4">

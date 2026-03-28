@@ -24,7 +24,20 @@ export default function Assistant() {
   const galleryInputRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Pequeño delay para asegurar que el DOM se haya actualizado completamente
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    };
+
+    const timeoutId = setTimeout(scrollToBottom, 100);
+
+    // Escuchar resize (teclado móvil) para re-ajustar scroll
+    window.addEventListener('resize', scrollToBottom);
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', scrollToBottom);
+    };
   }, [messages, isLoading]);
 
   useEffect(() => {
@@ -158,10 +171,16 @@ export default function Assistant() {
       }
     ]);
     setShowClearConfirm(false);
+    
+    // Forzar scroll al inicio del contenedor principal
+    const main = document.querySelector('main');
+    if (main) {
+      main.scrollTo({ top: 0, behavior: 'auto' });
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-full -mt-6 -mx-4 relative">
+    <div className="fixed inset-0 bg-white dark:bg-background-dark z-[100] flex flex-col overflow-hidden">
       {/* Input Oculto para Galería */}
       <input
         type="file"
@@ -172,28 +191,27 @@ export default function Assistant() {
       />
 
       {/* Botón Flotante Superior (Sticky en lugar de Fixed para evitar scroll con contenedores transformados) */}
-      <div className="sticky top-0 z-[60] w-full h-0">
-        <div className="absolute top-2 left-4">
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 rounded-full bg-slate-200/80 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center justify-center backdrop-blur-lg shadow-lg border border-white/30 dark:border-slate-600"
-          >
-            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-          </button>
+      <div className="z-[110] w-full flex items-center justify-between px-4 pt-safe pb-3 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/50">
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 transition-all flex items-center justify-center shrink-0"
+        >
+          <span className="material-symbols-outlined text-[24px]">arrow_back_ios_new</span>
+        </button>
+        <div className="flex-1 text-center">
+          <h1 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">Asistente IA</h1>
         </div>
-        <div className="absolute top-2 right-4">
-          <button
-            onClick={handleClearChat}
-            className="p-2 rounded-full bg-slate-200/80 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all flex items-center justify-center backdrop-blur-lg shadow-lg border border-white/30 dark:border-rose-500/30"
-            title="Borrar chat"
-          >
-            <span className="material-symbols-outlined text-[20px]">delete_sweep</span>
-          </button>
-        </div>
+        <button
+          onClick={handleClearChat}
+          className="p-2 rounded-full hover:bg-rose-50 dark:hover:bg-rose-500/10 text-rose-500 transition-all flex items-center justify-center shrink-0"
+          title="Borrar chat"
+        >
+          <span className="material-symbols-outlined text-[24px]">delete_sweep</span>
+        </button>
       </div>
 
-      {/* Contenedor Principal (pb-40 para que nada quede trabado abajo) */}
-      <div className="flex-1 p-4 pt-16 pb-40 space-y-5 scrollbar-hide">
+      {/* Contenedor Principal de Mensajes */}
+      <div className="flex-1 overflow-y-auto p-4 pt-6 pb-32 space-y-5 scrollbar-hide">
         {messages.map(msg => (
           msg.role === 'assistant' ? (
             <div key={msg.id} className="flex items-start gap-3">
@@ -201,8 +219,8 @@ export default function Assistant() {
                 <span className="material-symbols-outlined fill-active text-primary text-xl">smart_toy</span>
               </div>
               <div className="flex flex-1 flex-col gap-3 items-start">
-                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium px-1 uppercase tracking-wider">Asistente</p>
-                <div className="text-sm font-normal leading-relaxed max-w-[85%] rounded-2xl px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 shadow-sm whitespace-pre-wrap">
+                <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold px-1 uppercase tracking-widest">Asistente</p>
+                <div className="text-sm font-normal leading-relaxed max-w-[90%] rounded-2xl px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 shadow-sm whitespace-pre-wrap">
                   {msg.content}
                 </div>
 
@@ -230,12 +248,12 @@ export default function Assistant() {
             </div>
           ) : (
             <div key={msg.id} className="flex items-start gap-3 flex-row-reverse">
-              <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden border-2 border-slate-200 dark:border-slate-700">
+              <div className="w-9 h-9 rounded-full shrink-0 overflow-hidden border-2 border-slate-200 dark:border-slate-700">
                 <img className="w-full h-full object-cover" src={avatar} alt="User Avatar" />
               </div>
-              <div className="flex flex-col gap-1 items-end max-w-[80%]">
-                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium px-1 uppercase tracking-wider">Tú</p>
-                <div className="text-sm font-normal leading-relaxed rounded-2xl px-4 py-3 bg-primary text-white shadow-md whitespace-pre-wrap break-words break-all">
+              <div className="flex flex-col gap-1 items-end max-w-[85%]">
+                <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold px-1 uppercase tracking-widest">Tú</p>
+                <div className="text-sm font-normal leading-relaxed rounded-2xl px-4 py-3 bg-primary text-white shadow-md whitespace-pre-wrap break-words">
                   {msg.content}
                 </div>
               </div>
@@ -249,7 +267,7 @@ export default function Assistant() {
               <span className="material-symbols-outlined fill-active text-primary text-xl">smart_toy</span>
             </div>
             <div className="flex flex-col gap-1 items-start">
-              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium px-1 uppercase tracking-wider">Asistente</p>
+              <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold px-1 uppercase tracking-widest">Asistente</p>
               <div className="text-sm rounded-2xl px-4 py-4 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 flex items-center gap-1">
                 <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce"></div>
                 <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
@@ -259,13 +277,13 @@ export default function Assistant() {
           </div>
         )}
 
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      {/* Barra Inferior súper compacta (Achicada a pedido del usuario) */}
-      <div className="fixed bottom-0 left-0 w-full z-50 pb-2">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] p-1.5 rounded-full flex items-center gap-2 transition-all focus-within:ring-2 focus-within:ring-primary/50">
+      {/* Barra Inferior súper compacta */}
+      <div className="bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800/50 p-4 pb-safe-offset-2">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-full flex items-center gap-2 transition-all focus-within:ring-2 focus-within:ring-primary/50 focus-within:bg-white dark:focus-within:bg-slate-800">
             <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex flex-1 items-center gap-2">
               <button
                 type="button"
@@ -279,7 +297,7 @@ export default function Assistant() {
               <input
                 ref={inputRef}
                 autoFocus
-                className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-500 py-1 outline-none min-w-0"
+                className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-500 py-2 outline-none min-w-0"
                 placeholder="Escribe un mensaje..."
                 type="text"
                 value={input}
@@ -291,8 +309,8 @@ export default function Assistant() {
                 <span className="material-symbols-outlined text-xl">mic</span>
               </button>
 
-              <button type="submit" disabled={isLoading || !input.trim()} className="p-1.5 ml-1 aspect-square bg-primary text-white rounded-full shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 disabled:active:scale-100 transition-all flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[18px]">send</span>
+              <button type="submit" disabled={isLoading || !input.trim()} className="p-1.5 aspect-square bg-primary text-white rounded-full shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 disabled:active:scale-100 transition-all flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[20px]">send</span>
               </button>
             </form>
           </div>

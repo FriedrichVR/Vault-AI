@@ -18,6 +18,7 @@ export default function Assistant() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const galleryInputRef = useRef(null);
@@ -143,6 +144,22 @@ export default function Assistant() {
     }
   };
 
+  const handleClearChat = () => {
+    setShowClearConfirm(true);
+  };
+
+  const confirmClear = () => {
+    setMessages([
+      {
+        id: Date.now(),
+        role: 'assistant',
+        content: 'Chat reiniciado. ¿En qué puedo ayudarte hoy?',
+        hasGraph: false
+      }
+    ]);
+    setShowClearConfirm(false);
+  };
+
   return (
     <div className="flex flex-col min-h-full -mt-6 -mx-4 relative">
       {/* Input Oculto para Galería */}
@@ -156,12 +173,21 @@ export default function Assistant() {
 
       {/* Botón Flotante Superior (Sticky en lugar de Fixed para evitar scroll con contenedores transformados) */}
       <div className="sticky top-0 z-[60] w-full h-0">
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-2 left-4">
           <button
             onClick={() => navigate('/')}
             className="p-2 rounded-full bg-slate-200/80 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center justify-center backdrop-blur-lg shadow-lg border border-white/30 dark:border-slate-600"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+          </button>
+        </div>
+        <div className="absolute top-2 right-4">
+          <button
+            onClick={handleClearChat}
+            className="p-2 rounded-full bg-slate-200/80 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-all flex items-center justify-center backdrop-blur-lg shadow-lg border border-white/30 dark:border-rose-500/30"
+            title="Borrar chat"
+          >
+            <span className="material-symbols-outlined text-[20px]">delete_sweep</span>
           </button>
         </div>
       </div>
@@ -272,6 +298,43 @@ export default function Assistant() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Confirmación Custom */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowClearConfirm(false)}
+          />
+          <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800 transform transition-all scale-100 opacity-100 flex flex-col items-center text-center gap-6">
+            <div className="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center text-rose-500">
+              <span className="material-symbols-outlined text-4xl">delete_forever</span>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">¿Borrar conversación?</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                Esta acción eliminará todos los mensajes actuales. No podrás deshacer este cambio.
+              </p>
+            </div>
+
+            <div className="flex w-full gap-3 mt-2">
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="flex-1 py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmClear}
+                className="flex-1 py-3.5 px-4 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg shadow-rose-500/30 hover:bg-rose-600 transition-all active:scale-95"
+              >
+                Borrar todo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

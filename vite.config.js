@@ -33,7 +33,7 @@ if (!fs.existsSync('git-push.lock')) {
     } catch (commitErr) {
       log2 = 'Already committed or nothing to commit: ' + commitErr.message;
     }
-    const log3 = execSync(`${gitBin} pull --rebase`, { encoding: 'utf8' });
+    const log3 = execSync(`${gitBin} pull --no-rebase -X ours`, { encoding: 'utf8' });
     const log4 = execSync(`${gitBin} push`, { encoding: 'utf8' });
     fs.writeFileSync('git-push.log', `SUCCESS (used ${gitBin}):\n${log1}\n${log2}\n${log3}\n${log4}`);
   } catch (err) {

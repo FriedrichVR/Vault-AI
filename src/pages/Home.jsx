@@ -72,59 +72,82 @@ export default function Home() {
 
   // Helper to fetch consolidated net worth, income, and expenses from Google Sheets
   const fetchFinancialData = async () => {
+    let totalIncomes = 0;
+    let totalExpenses = 0;
+
+    // 1. Fetch Incomes
     try {
-      const sheetUrl = 'https://docs.google.com/spreadsheets/d/1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo/gviz/tq?tqx=out:csv&gid=2067457005';
-      const response = await fetch(sheetUrl);
+      const url = 'https://docs.google.com/spreadsheets/d/1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo/gviz/tq?tqx=out:csv&sheet=Ingresos';
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Network response was not ok');
       const text = await response.text();
       const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
       if (lines.length >= 2) {
         const headers = parseCSVRow(lines[0]);
-        const rowData = parseCSVRow(lines[1]);
-        
-        // Find indices dynamically based on header names
-        const ingresosIndex = headers.findIndex(h => h.trim().toLowerCase().includes('ingreso'));
-        const gastosIndex = headers.findIndex(h => h.trim().toLowerCase().includes('gasto'));
-        const patrimonioIndex = headers.findIndex(h => h.trim().toLowerCase().includes('patrimonio'));
+        const emisorIndex = headers.findIndex(h => h.trim().toLowerCase().includes('emisor'));
+        const montoIndex = headers.findIndex(h => h.trim().toLowerCase().includes('monto'));
+        const targetEmisorIndex = emisorIndex !== -1 ? emisorIndex : 0;
+        const targetMontoIndex = montoIndex !== -1 ? montoIndex : 1;
 
-        const targetIngresosIndex = ingresosIndex !== -1 ? ingresosIndex : 0;
-        const targetGastosIndex = gastosIndex !== -1 ? gastosIndex : 1;
-        const targetPatrimonioIndex = patrimonioIndex !== -1 ? patrimonioIndex : 2;
-
-        const ingresosStr = rowData[targetIngresosIndex];
-        const gastosStr = rowData[targetGastosIndex];
-        const patrimonioStr = rowData[targetPatrimonioIndex];
-
-        if (ingresosStr) {
-          const cleanValue = ingresosStr.replace(/[$,]/g, '');
-          const val = parseFloat(cleanValue);
-          if (!isNaN(val)) {
-            setIncome(val);
-            localStorage.setItem('user_income', val.toString());
+        const rows = lines.slice(1);
+        rows.forEach(row => {
+          const cols = parseCSVRow(row);
+          const emisor = cols[targetEmisorIndex];
+          const montoStr = cols[targetMontoIndex];
+          if (emisor && montoStr) {
+            const cleanVal = montoStr.replace(/[$,]/g, '');
+            const val = parseFloat(cleanVal);
+            if (!isNaN(val)) {
+              totalIncomes += val;
+            }
           }
-        }
-
-        if (gastosStr) {
-          const cleanValue = gastosStr.replace(/[$,]/g, '');
-          const val = parseFloat(cleanValue);
-          if (!isNaN(val)) {
-            setGastos(val);
-            localStorage.setItem('user_gastos', val.toString());
-          }
-        }
-
-        if (patrimonioStr) {
-          const cleanValue = patrimonioStr.replace(/[$,]/g, '');
-          const val = parseFloat(cleanValue);
-          if (!isNaN(val)) {
-            setPatrimonio(val);
-            localStorage.setItem('user_patrimonio', val.toString());
-          }
-        }
+        });
       }
     } catch (error) {
-      console.error('Error fetching financial data from Google Sheet:', error);
+      console.error('Error fetching incomes:', error);
     }
+
+    // 2. Fetch Expenses
+    try {
+      const url = 'https://docs.google.com/spreadsheets/d/1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo/gviz/tq?tqx=out:csv&sheet=Gastos';
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const text = await response.text();
+      const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+      if (lines.length >= 2) {
+        const headers = parseCSVRow(lines[0]);
+        const emisorIndex = headers.findIndex(h => h.trim().toLowerCase().includes('emisor'));
+        const montoIndex = headers.findIndex(h => h.trim().toLowerCase().includes('monto'));
+        const targetEmisorIndex = emisorIndex !== -1 ? emisorIndex : 0;
+        const targetMontoIndex = montoIndex !== -1 ? montoIndex : 1;
+
+        const rows = lines.slice(1);
+        rows.forEach(row => {
+          const cols = parseCSVRow(row);
+          const emisor = cols[targetEmisorIndex];
+          const montoStr = cols[targetMontoIndex];
+          if (emisor && montoStr) {
+            const cleanVal = montoStr.replace(/[$,]/g, '');
+            const val = parseFloat(cleanVal);
+            if (!isNaN(val)) {
+              totalExpenses += val;
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+    }
+
+    // 3. Update States and LocalStorage
+    setIncome(totalIncomes);
+    setGastos(totalExpenses);
+    const calculatedPatrimonio = totalIncomes - totalExpenses;
+    setPatrimonio(calculatedPatrimonio);
+
+    localStorage.setItem('user_income', totalIncomes.toString());
+    localStorage.setItem('user_gastos', totalExpenses.toString());
+    localStorage.setItem('user_patrimonio', calculatedPatrimonio.toString());
   };
 
   useEffect(() => {

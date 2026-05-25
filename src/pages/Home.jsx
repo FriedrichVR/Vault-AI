@@ -34,13 +34,19 @@ export default function Home() {
   // Dynamic Income State
   const [income, setIncome] = useState(() => {
     const saved = localStorage.getItem('user_income');
-    return saved ? parseFloat(saved) : 12450.00;
+    return saved ? parseFloat(saved) : 316000.00;
+  });
+
+  // Dynamic Gastos State
+  const [gastos, setGastos] = useState(() => {
+    const saved = localStorage.getItem('user_gastos');
+    return saved ? parseFloat(saved) : 1051819.63;
   });
   
   // Dynamic Patrimonio Neto State
   const [patrimonio, setPatrimonio] = useState(() => {
     const saved = localStorage.getItem('user_patrimonio');
-    return saved ? parseFloat(saved) : 428942.85;
+    return saved ? parseFloat(saved) : 982658.37;
   });
 
   const [showModal, setShowModal] = useState(false);
@@ -48,8 +54,29 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
 
-  // Helper to fetch consolidated net worth from Google Sheets
-  const fetchPatrimonio = async () => {
+  // Helper to parse CSV row respecting double quotes containing commas
+  const parseCSVRow = (row) => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < row.length; i++) {
+      const char = row[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim().replace(/^"|"$/g, ''));
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim().replace(/^"|"$/g, ''));
+    return result;
+  };
+
+  // Helper to fetch consolidated net worth, income, and expenses from Google Sheets
+  const fetchFinancialData = async () => {
+    // 1. Fetch Patrimonio Neto from 'resumen de flujo' tab
     try {
       const sheetUrl = 'https://docs.google.com/spreadsheets/d/1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo/gviz/tq?tqx=out:csv&sheet=resumen%20de%20flujo';
       const response = await fetch(sheetUrl);
@@ -57,27 +84,11 @@ export default function Home() {
       const text = await response.text();
       const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
       if (lines.length >= 2) {
-        // Parse CSV row respecting double quotes containing commas
-        const parseCSVRow = (row) => {
-          const result = [];
-          let current = '';
-          let inQuotes = false;
-          for (let i = 0; i < row.length; i++) {
-            const char = row[i];
-            if (char === '"') {
-              inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-              result.push(current.trim().replace(/^"|"$/g, ''));
-              current = '';
-            } else {
-              current += char;
-            }
-          }
-          result.push(current.trim().replace(/^"|"$/g, ''));
-          return result;
-        };
+        const headers = parseCSVRow(lines[0]);
         const rowData = parseCSVRow(lines[1]);
-        const patrimonioStr = rowData[3]; // Column D
+        const patrimonioIndex = headers.findIndex(h => h.trim().toLowerCase().includes('patrimonio'));
+        const targetIndex = patrimonioIndex !== -1 ? patrimonioIndex : 3;
+        const patrimonioStr = rowData[targetIndex];
         if (patrimonioStr) {
           const cleanValue = patrimonioStr.replace(/[$,]/g, '');
           const val = parseFloat(cleanValue);
@@ -90,6 +101,53 @@ export default function Home() {
     } catch (error) {
       console.error('Error fetching patrimonio from Google Sheet:', error);
     }
+
+    // 2. Fetch transactions from base tab to calculate incomes and expenses
+    try {
+      const transactionsUrl = 'https://docs.google.com/spreadsheets/d/1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo/gviz/tq?tqx=out:csv';
+      const response = await fetch(transactionsUrl);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const text = await response.text();
+      const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+      if (lines.length >= 2) {
+        const headers = parseCSVRow(lines[0]);
+        const tipoIndex = headers.findIndex(h => h.trim().toLowerCase().startsWith('tipo'));
+        const montoIndex = headers.findIndex(h => h.trim().toLowerCase().includes('monto'));
+        
+        const targetTipoIndex = tipoIndex !== -1 ? tipoIndex : 7;
+        const targetMontoIndex = montoIndex !== -1 ? montoIndex : 3;
+
+        let calculatedIncome = 0;
+        let calculatedGastos = 0;
+
+        const rows = lines.slice(1);
+        rows.forEach(row => {
+          const cols = parseCSVRow(row);
+          if (cols.length > Math.max(targetTipoIndex, targetMontoIndex)) {
+            const tipo = cols[targetTipoIndex] ? cols[targetTipoIndex].trim().toLowerCase() : '';
+            const montoStr = cols[targetMontoIndex];
+            if (montoStr) {
+              const cleanValue = montoStr.replace(/[$,]/g, '');
+              const val = parseFloat(cleanValue);
+              if (!isNaN(val)) {
+                if (tipo === 'ingresos') {
+                  calculatedIncome += val;
+                } else if (tipo === 'gastos') {
+                  calculatedGastos += val;
+                }
+              }
+            }
+          }
+        });
+
+        setIncome(calculatedIncome);
+        setGastos(calculatedGastos);
+        localStorage.setItem('user_income', calculatedIncome.toString());
+        localStorage.setItem('user_gastos', calculatedGastos.toString());
+      }
+    } catch (error) {
+      console.error('Error fetching transactions from Google Sheet:', error);
+    }
   };
 
   useEffect(() => {
@@ -97,8 +155,8 @@ export default function Home() {
     const date = new Date().toLocaleDateString('es-ES', options);
     setCurrentDate(date.charAt(0).toUpperCase() + date.slice(1));
     
-    // Fetch consolidated net worth on mount
-    fetchPatrimonio();
+    // Fetch financial data on mount
+    fetchFinancialData();
   }, []);
 
   // Auto-dismiss notifications
@@ -114,7 +172,6 @@ export default function Home() {
   const currentChart = CHART_DATA[activePeriod];
 
   // Dynamic Flow and Progress Calculations
-  const gastos = 8210.40;
   const netFlow = income - gastos;
   const maxVal = Math.max(income, gastos, 15000);
   const incomePercent = Math.min(100, Math.max(5, Math.round((income / maxVal) * 100)));
@@ -171,7 +228,7 @@ export default function Home() {
         });
         // Trigger a background refetch of Patrimonio from Sheet after N8N webhook trigger
         setTimeout(() => {
-          fetchPatrimonio();
+          fetchFinancialData();
         }, 2000);
       } else {
         const errorText = await response.text();
@@ -234,7 +291,9 @@ export default function Home() {
             <div>
               <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Gastos</p>
               <div className="flex justify-between items-center mb-2">
-                <p className="text-xl font-bold text-rose-500">$8,210.40</p>
+                <p className="text-xl font-bold text-rose-500">
+                  ${gastos.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
               </div>
               <div className="w-full bg-slate-200 dark:bg-border-dark h-1 rounded-full overflow-hidden flex">
                 <div className="bg-rose-500 h-full rounded-full transition-all duration-500" style={{ width: `${gastosPercent}%` }}></div>
@@ -324,69 +383,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </div>
-      </section>
-
-
-      {/* Monthly Budgets */}
-      <section className="mb-6 animate-slide-up delay-300">
-        <div className="flex items-center justify-between mb-4 px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Presupuestos Mensuales</h2>
-          <button className="text-primary text-[9px] font-bold uppercase tracking-wider">Ver Todos</button>
-        </div>
-        <div className="space-y-5 px-1">
-          {/* Budget Card 1 */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[16px]">local_mall</span>
-                <p className="text-xs font-semibold text-slate-900 dark:text-white">Compras</p>
-              </div>
-              <p className="text-xs font-bold text-slate-900 dark:text-white">$842 <span className="text-slate-500 font-medium">/ $1,200</span></p>
-            </div>
-            <div className="w-full bg-slate-200 dark:bg-border-dark h-1.5 rounded-full overflow-hidden">
-              <div className="bg-primary h-full rounded-full" style={{ width: '70%' }}></div>
-            </div>
-          </div>
-          {/* Budget Card 2 */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[16px]">restaurant</span>
-                <p className="text-xs font-semibold text-slate-900 dark:text-white">Restaurantes</p>
-              </div>
-              <p className="text-xs font-bold text-slate-900 dark:text-white">$320 <span className="text-slate-500 font-medium">/ $500</span></p>
-            </div>
-            <div className="w-full bg-slate-200 dark:bg-border-dark h-1.5 rounded-full overflow-hidden">
-              <div className="bg-primary h-full rounded-full" style={{ width: '64%' }}></div>
-            </div>
-          </div>
-          {/* Budget Card 3 */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[16px]">flight</span>
-                <p className="text-xs font-semibold text-slate-900 dark:text-white">Viajes</p>
-              </div>
-              <p className="text-xs font-bold text-slate-900 dark:text-white">$1,450 <span className="text-slate-500 font-medium">/ $1,500</span></p>
-            </div>
-            <div className="w-full bg-slate-200 dark:bg-border-dark h-1.5 rounded-full overflow-hidden">
-              <div className="bg-rose-500 h-full rounded-full" style={{ width: '96%' }}></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Recent Activity */}
-      <section className="mb-8 animate-slide-up delay-400">
-        <div className="flex items-center justify-between mb-4 px-1">
-          <h2 className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Actividad Reciente</h2>
-          <button className="text-primary text-[9px] font-bold uppercase tracking-wider">Historial</button>
-        </div>
-        <div className="space-y-2">
-          <TransactionItem title="Amazon AWS" category="Infraestructura Cloud" amount="-124.50" status="Analizado" icon="dns" />
-          <TransactionItem title="Blue Bottle Coffee" category="Comida y Bebidas" amount="-12.00" status="Procesando" icon="coffee" isStatusIndigo />
-          <TransactionItem title="Steam Purchase" category="Entretenimiento" amount="-59.99" status="Analizado" icon="sports_esports" />
         </div>
       </section>
 
@@ -488,32 +484,6 @@ export default function Home() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function TransactionItem({ title, category, amount, status, icon, isStatusIndigo }) {
-  return (
-    <div className="flex items-center justify-between p-3 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl">
-      <div className="flex items-center gap-3">
-        <div className="size-10 rounded-lg bg-slate-200 dark:bg-border-dark/50 flex items-center justify-center">
-          <span className="material-symbols-outlined text-slate-300">{icon}</span>
-        </div>
-        <div>
-          <p className="text-sm font-bold text-slate-900 dark:text-white">{title}</p>
-          <p className="text-[9px] uppercase tracking-wider font-medium text-slate-500 dark:text-slate-400 mt-0.5">{category}</p>
-        </div>
-      </div>
-      <div className="text-right flex flex-col items-end gap-1.5">
-        <p className="text-sm font-bold text-slate-900 dark:text-white">{amount}</p>
-        <span className={`text-[8px] font-bold tracking-wider px-2 py-0.5 rounded uppercase border ${
-          isStatusIndigo 
-            ? 'bg-primary/20 text-indigo-400 border-primary/20' 
-            : 'bg-emerald-900/30 text-emerald-500 border-emerald-500/10'
-        }`}>
-          {status}
-        </span>
-      </div>
     </div>
   );
 }

@@ -5,6 +5,31 @@ export default function Movements() {
   const [searchTerm, setSearchTerm] = useState('');
   const [movements, setMovements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currency, setCurrency] = useState(() => {
+    const code = localStorage.getItem('userCurrency') || 'ARS';
+    const configs = {
+      ARS: { symbol: '$', label: 'ARS (Pesos Argentinos)' },
+      USD: { symbol: 'US$', label: 'USD (Dólares)' },
+      EUR: { symbol: '€', label: 'EUR (Euros)' },
+      CLP: { symbol: 'CLP$', label: 'CLP (Pesos Chilenos)' }
+    };
+    return configs[code] || configs.ARS;
+  });
+
+  useEffect(() => {
+    const handleCurrencyUpdate = () => {
+      const code = localStorage.getItem('userCurrency') || 'ARS';
+      const configs = {
+        ARS: { symbol: '$', label: 'ARS (Pesos Argentinos)' },
+        USD: { symbol: 'US$', label: 'USD (Dólares)' },
+        EUR: { symbol: '€', label: 'EUR (Euros)' },
+        CLP: { symbol: 'CLP$', label: 'CLP (Pesos Chilenos)' }
+      };
+      setCurrency(configs[code] || configs.ARS);
+    };
+    window.addEventListener('currencyUpdate', handleCurrencyUpdate);
+    return () => window.removeEventListener('currencyUpdate', handleCurrencyUpdate);
+  }, []);
 
   // Helper to parse CSV row respecting double quotes containing commas
   const parseCSVRow = (row) => {
@@ -226,7 +251,7 @@ export default function Movements() {
                   const cleanVal = movement.amountStr.replace(/[$,]/g, '');
                   const val = parseFloat(cleanVal);
                   const formattedAmount = !isNaN(val) 
-                    ? `${isIngreso ? '+' : '-'}$${val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    ? `${isIngreso ? '+' : '-'}${currency.symbol}${val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     : movement.amountStr;
 
                   return (

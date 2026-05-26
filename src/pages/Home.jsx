@@ -30,6 +30,31 @@ const CHART_DATA = {
 export default function Home() {
   const [currentDate, setCurrentDate] = useState('');
   const [activePeriod, setActivePeriod] = useState('1s');
+  const [currency, setCurrency] = useState(() => {
+    const code = localStorage.getItem('userCurrency') || 'ARS';
+    const configs = {
+      ARS: { code: 'ARS', symbol: '$', label: 'ARS (Pesos Argentinos)' },
+      USD: { code: 'USD', symbol: 'US$', label: 'USD (Dólares)' },
+      EUR: { code: 'EUR', symbol: '€', label: 'EUR (Euros)' },
+      CLP: { code: 'CLP', symbol: 'CLP$', label: 'CLP (Pesos Chilenos)' }
+    };
+    return configs[code] || configs.ARS;
+  });
+
+  useEffect(() => {
+    const handleCurrencyUpdate = () => {
+      const code = localStorage.getItem('userCurrency') || 'ARS';
+      const configs = {
+        ARS: { code: 'ARS', symbol: '$', label: 'ARS (Pesos Argentinos)' },
+        USD: { code: 'USD', symbol: 'US$', label: 'USD (Dólares)' },
+        EUR: { code: 'EUR', symbol: '€', label: 'EUR (Euros)' },
+        CLP: { code: 'CLP', symbol: 'CLP$', label: 'CLP (Pesos Chilenos)' }
+      };
+      setCurrency(configs[code] || configs.ARS);
+    };
+    window.addEventListener('currencyUpdate', handleCurrencyUpdate);
+    return () => window.removeEventListener('currencyUpdate', handleCurrencyUpdate);
+  }, []);
   
   // Dynamic Income State
   const [income, setIncome] = useState(() => {
@@ -177,8 +202,8 @@ export default function Home() {
   const gastosPercent = Math.min(100, Math.max(5, Math.round((gastos / maxVal) * 100)));
   
   const netFlowFormatted = netFlow >= 0 
-    ? `$${netFlow.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-    : `-$${Math.abs(netFlow).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    ? `${currency.symbol}${netFlow.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    : `-${currency.symbol}${Math.abs(netFlow).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   // Split integer and decimal parts of consolidated net worth for styling
   const formattedPatrimonio = patrimonio.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -192,10 +217,13 @@ export default function Home() {
     <div className="flex flex-col gap-6 animate-fade-in">
       {/* Main Balance Section */}
       <section className="mb-6 animate-slide-up">
-        <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold tracking-[0.15em] mb-1 uppercase">Patrimonio Neto Consolidado</p>
+        <div className="flex items-center gap-2 mb-1">
+          <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold tracking-[0.15em] uppercase">Patrimonio Neto Consolidado</p>
+          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider">{currency.code}</span>
+        </div>
         <div className="flex items-baseline gap-2">
           <h1 className="text-[32px] font-bold tracking-tight text-slate-900 dark:text-white">
-            ${patrimonioInteger}<span className="text-slate-500 dark:text-slate-400">.{patrimonioDecimal}</span>
+            {currency.symbol}{patrimonioInteger}<span className="text-slate-500 dark:text-slate-400">.{patrimonioDecimal}</span>
           </h1>
         </div>
       </section>
@@ -210,7 +238,7 @@ export default function Home() {
               <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Ingresos</p>
               <div className="flex justify-between items-center mb-2">
                 <p className="text-xl font-bold text-emerald-400">
-                  ${income.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {currency.symbol}{income.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>
               <div className="w-full bg-slate-200 dark:bg-border-dark h-1 rounded-full overflow-hidden flex">
@@ -222,7 +250,7 @@ export default function Home() {
               <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Gastos</p>
               <div className="flex justify-between items-center mb-2">
                 <p className="text-xl font-bold text-rose-500">
-                  ${gastos.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {currency.symbol}{gastos.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>
               <div className="w-full bg-slate-200 dark:bg-border-dark h-1 rounded-full overflow-hidden flex">

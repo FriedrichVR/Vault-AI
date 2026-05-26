@@ -10,6 +10,17 @@ export default function Profile() {
   );
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [currency, setCurrency] = useState(() => {
+    const code = localStorage.getItem('userCurrency') || 'ARS';
+    const configs = {
+      ARS: { symbol: '$', label: 'ARS (Pesos Argentinos)' },
+      USD: { symbol: 'US$', label: 'USD (Dólares)' },
+      EUR: { symbol: '€', label: 'EUR (Euros)' },
+      CLP: { symbol: 'CLP$', label: 'CLP (Pesos Chilenos)' }
+    };
+    return configs[code] || configs.ARS;
+  });
 
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
@@ -35,6 +46,20 @@ export default function Profile() {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
+  };
+
+  const handleCurrencyChange = (code) => {
+    const configs = {
+      ARS: { symbol: '$', label: 'ARS (Pesos Argentinos)' },
+      USD: { symbol: 'US$', label: 'USD (Dólares)' },
+      EUR: { symbol: '€', label: 'EUR (Euros)' },
+      CLP: { symbol: 'CLP$', label: 'CLP (Pesos Chilenos)' }
+    };
+    const selected = configs[code] || configs.ARS;
+    localStorage.setItem('userCurrency', code);
+    setCurrency(selected);
+    window.dispatchEvent(new Event('currencyUpdate'));
+    setShowCurrencyModal(false);
   };
 
   // Helper to parse CSV row respecting double quotes containing commas
@@ -267,7 +292,7 @@ export default function Profile() {
       const cleanVal = m.amountStr.replace(/[$,]/g, '');
       const val = parseFloat(cleanVal);
       const amountFormatted = !isNaN(val) 
-        ? `${isIngreso ? '+' : '-'}$${val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        ? `${isIngreso ? '+' : '-'}${currency.symbol}${val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
         : m.amountStr;
 
       const typeText = isIngreso ? 'Ingreso' : 'Gasto';
@@ -449,16 +474,16 @@ export default function Profile() {
         <div class="summary-cards">
           <div class="card">
             <h4 class="card-title">Total Ingresos</h4>
-            <p class="card-value value-emerald">$${totalIncomes.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</p>
+            <p class="card-value value-emerald">${currency.symbol}${totalIncomes.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</p>
           </div>
           <div class="card">
             <h4 class="card-title">Total Gastos</h4>
-            <p class="card-value value-rose">$${totalExpenses.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</p>
+            <p class="card-value value-rose">${currency.symbol}${totalExpenses.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</p>
           </div>
           <div class="card">
             <h4 class="card-title">Balance Neto</h4>
             <p class="card-value ${balance >= 0 ? 'value-emerald' : 'value-rose'}">
-              ${balance >= 0 ? '+' : ''}$${balance.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+              ${balance >= 0 ? '+' : ''}${currency.symbol}${balance.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
             </p>
           </div>
         </div>
@@ -556,7 +581,7 @@ export default function Profile() {
         <h2 className="text-[10px] font-bold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase mt-8 mb-2 px-1">Preferencias Financieras</h2>
         
         <div className="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-2xl overflow-hidden shadow-lg">
-          <MenuLink icon="payments" color="indigo" label="Moneda Principal" sub="ARS (Pesos Argentinos)" />
+          <MenuLink icon="payments" color="indigo" label="Moneda Principal" sub={currency.label} onClick={() => setShowCurrencyModal(true)} />
           <MenuLink icon="download" color="rose" label="Exportar Reportes" sub="PDF, Excel, CSV" isLast onClick={() => setShowExportModal(true)} />
         </div>
 
@@ -662,6 +687,59 @@ export default function Profile() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Cambio de Moneda */}
+      {showCurrencyModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowCurrencyModal(false)}
+          />
+          <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800 transform transition-all scale-100 opacity-100 flex flex-col gap-6">
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-500">
+                <span className="material-symbols-outlined text-4xl">payments</span>
+              </div>
+              
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Moneda Principal</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
+                  Selecciona la moneda principal para mostrar tus balances y movimientos.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {[
+                { code: 'ARS', label: 'ARS (Pesos Argentinos)', symbol: '$' },
+                { code: 'USD', label: 'USD (Dólares)', symbol: 'US$' },
+                { code: 'EUR', label: 'EUR (Euros)', symbol: '€' },
+                { code: 'CLP', label: 'CLP (Pesos Chilenos)', symbol: 'CLP$' }
+              ].map(c => (
+                <button
+                  key={c.code}
+                  onClick={() => handleCurrencyChange(c.code)}
+                  className={`flex items-center justify-between p-4 rounded-2xl border transition-all text-left ${
+                    currency.code === c.code 
+                      ? 'border-indigo-500 bg-indigo-500/5 text-indigo-600 dark:text-indigo-400' 
+                      : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                  }`}
+                >
+                  <span className="text-sm font-semibold">{c.label}</span>
+                  <span className="text-sm font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg">{c.symbol}</span>
+                </button>
+              ))}
+
+              <button
+                onClick={() => setShowCurrencyModal(false)}
+                className="mt-2 w-full py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}

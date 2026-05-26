@@ -12,8 +12,7 @@ export default function Assistant() {
     {
       id: 1,
       role: 'assistant',
-      content: 'Hola, he analizado tus finanzas del último mes. Tu ahorro ha incrementado un 12% respecto al periodo anterior. Aquí tienes el desglose de tus gastos:',
-      hasGraph: true
+      content: '¿En qué puedo ayudarte hoy?'
     }
   ]);
   const [input, setInput] = useState('');

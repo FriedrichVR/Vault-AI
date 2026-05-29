@@ -236,24 +236,14 @@ export default function Movements() {
           date: cleanDate
         };
 
-        const response = await fetch(appsScriptUrl, {
+        await fetch(appsScriptUrl, {
           method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain'
+          },
           body: JSON.stringify(payload)
         });
-
-        const resText = await response.text();
-        let resData;
-        try {
-          resData = JSON.parse(resText);
-        } catch (e) {
-          if (!response.ok) {
-            throw new Error('No se pudo guardar en Google Sheets.');
-          }
-        }
-
-        if (resData && resData.success === false) {
-          throw new Error(resData.error || 'Error desconocido al guardar en Google Sheets.');
-        }
       } catch (error) {
         console.error('Error saving to Google Sheets:', error);
         alert('Error al sincronizar con Google Sheets: ' + error.message + '\nLos cambios se aplicarán solo de forma local.');
@@ -299,24 +289,14 @@ export default function Movements() {
           date: editingMovement.originalFecha
         };
 
-        const response = await fetch(appsScriptUrl, {
+        await fetch(appsScriptUrl, {
           method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain'
+          },
           body: JSON.stringify(payload)
         });
-
-        const resText = await response.text();
-        let resData;
-        try {
-          resData = JSON.parse(resText);
-        } catch (e) {
-          if (!response.ok) {
-            throw new Error('No se pudo restaurar en Google Sheets.');
-          }
-        }
-
-        if (resData && resData.success === false) {
-          throw new Error(resData.error || 'Error al restaurar en Google Sheets.');
-        }
       } catch (error) {
         console.error('Error resetting Google Sheets:', error);
         alert('Error al restaurar en Google Sheets: ' + error.message);

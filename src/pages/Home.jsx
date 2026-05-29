@@ -99,6 +99,7 @@ export default function Home() {
   const fetchFinancialData = async () => {
     let totalIncomes = 0;
     let totalExpenses = 0;
+    const overrides = JSON.parse(localStorage.getItem('movements_overrides') || '{}');
 
     // 1. Fetch Incomes
     try {
@@ -115,12 +116,15 @@ export default function Home() {
         const targetMontoIndex = montoIndex !== -1 ? montoIndex : 1;
 
         const rows = lines.slice(1);
-        rows.forEach(row => {
+        rows.forEach((row, idx) => {
           const cols = parseCSVRow(row);
           const emisor = cols[targetEmisorIndex];
           const montoStr = cols[targetMontoIndex];
           if (emisor && montoStr) {
-            const cleanVal = montoStr.replace(/[$,]/g, '');
+            const movementId = `ingreso-${idx}`;
+            const cleanVal = overrides[movementId] 
+              ? overrides[movementId].amountStr.replace(/[$,]/g, '')
+              : montoStr.replace(/[$,]/g, '');
             const val = parseFloat(cleanVal);
             if (!isNaN(val)) {
               totalIncomes += val;
@@ -147,12 +151,15 @@ export default function Home() {
         const targetMontoIndex = montoIndex !== -1 ? montoIndex : 1;
 
         const rows = lines.slice(1);
-        rows.forEach(row => {
+        rows.forEach((row, idx) => {
           const cols = parseCSVRow(row);
           const emisor = cols[targetEmisorIndex];
           const montoStr = cols[targetMontoIndex];
           if (emisor && montoStr) {
-            const cleanVal = montoStr.replace(/[$,]/g, '');
+            const movementId = `gasto-${idx}`;
+            const cleanVal = overrides[movementId] 
+              ? overrides[movementId].amountStr.replace(/[$,]/g, '')
+              : montoStr.replace(/[$,]/g, '');
             const val = parseFloat(cleanVal);
             if (!isNaN(val)) {
               totalExpenses += val;
@@ -183,12 +190,21 @@ export default function Home() {
     // Fetch financial data on mount
     fetchFinancialData();
 
+    // Listen to movement modifications
+    const handleMovementsUpdate = () => {
+      fetchFinancialData();
+    };
+    window.addEventListener('movementsUpdate', handleMovementsUpdate);
+
     // Poll financial data every 1 minute (60000 ms)
     const interval = setInterval(() => {
       fetchFinancialData();
     }, 60000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('movementsUpdate', handleMovementsUpdate);
+    };
   }, []);
 
 

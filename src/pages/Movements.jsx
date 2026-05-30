@@ -791,12 +791,21 @@ export default function Movements() {
           <div className="relative flex-1">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">search</span>
             <input 
-              className="w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-slate-500" 
+              className={`w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl py-2.5 pl-10 ${searchTerm ? 'pr-9' : 'pr-4'} text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-slate-500`}
               placeholder="Buscar transacciones..." 
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors"
+                title="Limpiar búsqueda"
+              >
+                <span className="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            )}
           </div>
           <button 
             onClick={fetchMovements}

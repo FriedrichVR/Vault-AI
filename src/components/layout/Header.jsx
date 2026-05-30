@@ -7,11 +7,6 @@ export default function Header() {
         </div>
         <span className="text-xl font-black italic tracking-[-0.05em] text-slate-900 dark:text-white">VAULT AI</span>
       </div>
-      <div className="flex items-center gap-4">
-        <button className="text-slate-500 dark:text-slate-400">
-          <span className="material-symbols-outlined">search</span>
-        </button>
-      </div>
     </header>
   );
 }

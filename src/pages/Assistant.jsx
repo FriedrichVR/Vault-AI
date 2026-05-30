@@ -464,7 +464,7 @@ export default function Assistant() {
             className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setShowClearConfirm(false)}
           />
-          <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800 transform transition-all scale-100 opacity-100 flex flex-col items-center text-center gap-6">
+          <div className="relative bg-white dark:bg-surface-dark rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-border-dark transform transition-all scale-100 opacity-100 flex flex-col items-center text-center gap-5">
             <div className="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center text-rose-500">
               <span className="material-symbols-outlined text-4xl">delete_forever</span>
             </div>
@@ -479,13 +479,13 @@ export default function Assistant() {
             <div className="flex w-full gap-3 mt-2">
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className="flex-1 py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-sm"
               >
                 Cancelar
               </button>
               <button
                 onClick={confirmClear}
-                className="flex-1 py-3.5 px-4 rounded-2xl bg-rose-500 text-white font-semibold shadow-lg shadow-rose-500/30 hover:bg-rose-600 transition-all active:scale-95"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-500 text-white font-semibold hover:bg-rose-600 transition-colors active:scale-95 text-sm"
               >
                 Borrar todo
               </button>

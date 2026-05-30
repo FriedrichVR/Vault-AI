@@ -10,9 +10,9 @@ export default {
       colors: {
         "primary": "#0d0df2", // Electric indigo
         "background-light": "#f5f5f8",
-        "background-dark": "#121212",
-        "surface-dark": "#1e1e1e",
-        "border-dark": "#2a2a2a"
+        "background-dark": "#141416",
+        "surface-dark": "#1f1f23",
+        "border-dark": "#2b2b2f"
       },
       fontFamily: {
         "display": ["Inter", "sans-serif"]

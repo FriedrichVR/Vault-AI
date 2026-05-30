@@ -599,8 +599,8 @@ export default function Profile() {
         <div className="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-2xl overflow-hidden shadow-lg">
           <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-dark">
             <div className="flex items-center gap-3">
-              <div className="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                <span className="material-symbols-outlined text-slate-300 text-[18px]">dark_mode</span>
+              <div className="size-8 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center">
+                <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 text-[18px]">dark_mode</span>
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-900 dark:text-white">Modo Oscuro</p>
@@ -609,7 +609,7 @@ export default function Profile() {
             {/* Toggle Switch */}
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" checked={isDarkMode} onChange={toggleTheme} className="sr-only peer" />
-              <div className="w-9 h-5 bg-slate-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+              <div className="w-9 h-5 bg-slate-200 dark:bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
             </label>
           </div>
           <MenuLink icon="help" color="slate" label="Ayuda y Soporte" isLast />
@@ -628,7 +628,7 @@ export default function Profile() {
             className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => !exportLoading && setShowExportModal(false)}
           />
-          <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800 transform transition-all scale-100 opacity-100 flex flex-col gap-6">
+          <div className="relative bg-white dark:bg-surface-dark rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-border-dark transform transition-all scale-100 opacity-100 flex flex-col gap-5">
             <div className="flex flex-col items-center text-center gap-3">
               <div className="w-16 h-16 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary">
                 <span className="material-symbols-outlined text-4xl">download</span>
@@ -651,7 +651,7 @@ export default function Profile() {
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => handleExport('pdf')}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left group"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group"
                 >
                   <div className="size-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span className="material-symbols-outlined text-2xl">picture_as_pdf</span>
@@ -664,7 +664,7 @@ export default function Profile() {
 
                 <button
                   onClick={() => handleExport('excel')}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left group"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group"
                 >
                   <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span className="material-symbols-outlined text-2xl">table_chart</span>
@@ -677,7 +677,7 @@ export default function Profile() {
 
                 <button
                   onClick={() => handleExport('csv')}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left group"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group"
                 >
                   <div className="size-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span className="material-symbols-outlined text-2xl">csv</span>
@@ -690,7 +690,7 @@ export default function Profile() {
 
                 <button
                   onClick={() => setShowExportModal(false)}
-                  className="mt-2 w-full py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
+                  className="mt-2 w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-center text-sm"
                 >
                   Cancelar
                 </button>
@@ -707,7 +707,7 @@ export default function Profile() {
             className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setShowCurrencyModal(false)}
           />
-          <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800 transform transition-all scale-100 opacity-100 flex flex-col gap-6">
+          <div className="relative bg-white dark:bg-surface-dark rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-border-dark transform transition-all scale-100 opacity-100 flex flex-col gap-5">
             <div className="flex flex-col items-center text-center gap-3">
               <div className="w-16 h-16 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-500">
                 <span className="material-symbols-outlined text-4xl">payments</span>
@@ -731,20 +731,20 @@ export default function Profile() {
                 <button
                   key={c.code}
                   onClick={() => handleCurrencyChange(c.code)}
-                  className={`flex items-center justify-between p-4 rounded-2xl border transition-all text-left ${
+                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all text-left ${
                     currency.code === c.code 
                       ? 'border-indigo-500 bg-indigo-500/5 text-indigo-600 dark:text-indigo-400' 
-                      : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                      : 'border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-white/5'
                   }`}
                 >
                   <span className="text-sm font-semibold">{c.label}</span>
-                  <span className="text-sm font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg">{c.symbol}</span>
+                  <span className="text-sm font-bold bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-lg">{c.symbol}</span>
                 </button>
               ))}
 
               <button
                 onClick={() => setShowCurrencyModal(false)}
-                className="mt-2 w-full py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
+                className="mt-2 w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-center text-sm"
               >
                 Cancelar
               </button>
@@ -775,7 +775,7 @@ function MenuLink({ icon, color, label, sub, isLast, onClick }) {
   };
 
   return (
-    <a href="#" onClick={handleClick} className={`flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${!isLast ? 'border-b border-slate-200 dark:border-border-dark' : ''}`}>
+    <a href="#" onClick={handleClick} className={`flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors ${!isLast ? 'border-b border-slate-200 dark:border-border-dark' : ''}`}>
       <div className="flex items-center gap-3">
         <div className={`size-8 rounded-lg flex items-center justify-center ${colorClasses[color]}`}>
           <span className="material-symbols-outlined text-[18px]">{icon}</span>

@@ -26,6 +26,34 @@ const getSpreadsheetId = () => {
   return match && match[1] ? match[1] : cleanUrl;
 };
 
+const formatDateToInput = (dateStr) => {
+  if (!dateStr) return '';
+  const clean = dateStr.trim();
+  
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+    return clean;
+  }
+  
+  const dmyMatch = clean.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (dmyMatch) {
+    const [_, d, m, y] = dmyMatch;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+  
+  const ymdMatch = clean.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/);
+  if (ymdMatch) {
+    const [_, y, m, d] = ymdMatch;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+
+  const parsed = new Date(clean);
+  if (!isNaN(parsed.getTime())) {
+    return parsed.toISOString().slice(0, 10);
+  }
+
+  return '';
+};
+
 export default function Movements() {
   const [filter, setFilter] = useState('Todos'); // 'Todos', 'Ingresos', 'Gastos'
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,7 +71,7 @@ export default function Movements() {
       const cleanVal = editingMovement.amountStr.replace(/[$,]/g, '');
       const val = parseFloat(cleanVal);
       setEditAmount(isNaN(val) ? '' : val.toString());
-      setEditDate(editingMovement.fecha || '');
+      setEditDate(formatDateToInput(editingMovement.originalFecha || editingMovement.fecha || ''));
     } else {
       setEditAmount('');
       setEditDate('');
@@ -335,7 +363,7 @@ export default function Movements() {
 
     const interval = setInterval(() => {
       fetchMovements();
-    }, 60000);
+    }, 300000);
 
     return () => {
       clearInterval(interval);
@@ -360,12 +388,15 @@ export default function Movements() {
     if (!a.fecha && !b.fecha) return 0;
     if (!a.fecha) return 1;
     if (!b.fecha) return -1;
-    return b.fecha.localeCompare(a.fecha);
+    const dateA = formatDateToInput(a.fecha);
+    const dateB = formatDateToInput(b.fecha);
+    return dateB.localeCompare(dateA);
   });
 
   const formatDateHeader = (dateStr) => {
     if (!dateStr) return 'Últimos Movimientos';
-    const date = new Date(dateStr + 'T12:00:00');
+    const inputDate = formatDateToInput(dateStr);
+    const date = new Date((inputDate || dateStr) + 'T12:00:00');
     if (isNaN(date.getTime())) return dateStr;
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
     return date.toLocaleDateString('es-ES', options).toUpperCase();
@@ -768,31 +799,20 @@ export default function Movements() {
             />
           </div>
           <button 
+            onClick={fetchMovements}
+            disabled={loading}
+            className="flex items-center justify-center p-2.5 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:border-primary/50 dark:hover:border-primary/50 transition-colors shadow-sm disabled:opacity-50"
+            title="Actualizar desde Google Sheets"
+          >
+            <span className={`material-symbols-outlined text-lg ${loading ? 'animate-spin' : ''}`}>sync</span>
+          </button>
+          <button 
             onClick={() => setShowExportModal(true)}
             className="flex items-center justify-center p-2.5 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:border-primary/50 dark:hover:border-primary/50 transition-colors shadow-sm"
             title="Exportar Reportes"
           >
             <span className="material-symbols-outlined text-lg">download</span>
           </button>
-          {(() => {
-            const overrides = JSON.parse(localStorage.getItem('movements_overrides') || '{}');
-            const hasOverrides = Object.keys(overrides).length > 0;
-            return hasOverrides && (
-              <button 
-                onClick={() => {
-                  if (confirm('¿Deseas restaurar todos los valores originales de Google Sheets y borrar los cambios locales?')) {
-                    localStorage.removeItem('movements_overrides');
-                    fetchMovements();
-                    window.dispatchEvent(new Event('movementsUpdate'));
-                  }
-                }}
-                className="flex items-center justify-center p-2.5 bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/20 dark:border-orange-500/30 rounded-xl text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-all shadow-sm"
-                title="Restaurar valores de Google Sheets"
-              >
-                <span className="material-symbols-outlined text-lg">restart_alt</span>
-              </button>
-            );
-          })()}
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           <button 
@@ -837,7 +857,7 @@ export default function Movements() {
         ) : Object.keys(groups).length > 0 ? (
           Object.keys(groups).map(header => (
             <div key={header}>
-              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 px-1">{header}</h2>
+              <h2 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3 px-1">{header}</h2>
               <div className="space-y-1">
                 {groups[header].map((movement, index) => {
                   const isIngreso = movement.tipo === 'ingreso';
@@ -877,7 +897,7 @@ export default function Movements() {
             className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => !exportLoading && setShowExportModal(false)}
           />
-          <div className="relative bg-white dark:bg-slate-950 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-900 transform transition-all scale-100 opacity-100 flex flex-col gap-6">
+          <div className="relative bg-white dark:bg-surface-dark rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-border-dark transform transition-all scale-100 opacity-100 flex flex-col gap-5">
             <div className="flex flex-col items-center text-center gap-3">
               <div className="w-16 h-16 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary">
                 <span className="material-symbols-outlined text-4xl">download</span>
@@ -900,7 +920,7 @@ export default function Movements() {
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => handleExport('pdf')}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all text-left group"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group"
                 >
                   <div className="size-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span className="material-symbols-outlined text-2xl">picture_as_pdf</span>
@@ -913,7 +933,7 @@ export default function Movements() {
 
                 <button
                   onClick={() => handleExport('excel')}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all text-left group"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group"
                 >
                   <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span className="material-symbols-outlined text-2xl">table_chart</span>
@@ -926,7 +946,7 @@ export default function Movements() {
 
                 <button
                   onClick={() => handleExport('csv')}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all text-left group"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left group"
                 >
                   <div className="size-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span className="material-symbols-outlined text-2xl">csv</span>
@@ -939,7 +959,7 @@ export default function Movements() {
 
                 <button
                   onClick={() => setShowExportModal(false)}
-                  className="mt-2 w-full py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors text-center"
+                  className="mt-2 w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-center text-sm"
                 >
                   Cancelar
                 </button>
@@ -953,17 +973,10 @@ export default function Movements() {
       {editingMovement && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-slate-950/60 dark:bg-black/80 backdrop-blur-md transition-opacity"
+            className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={() => setEditingMovement(null)}
           />
-          <div className="relative overflow-hidden bg-white dark:bg-slate-950 rounded-[2.5rem] p-7 max-w-sm w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-900 transform transition-all scale-100 opacity-100 flex flex-col gap-6 animate-scale-in">
-            {/* Top Accent Gradient Line */}
-            <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${
-              editingMovement.tipo === 'ingreso'
-                ? 'from-emerald-400 to-teal-500'
-                : 'from-rose-500 to-pink-500'
-            }`} />
-
+          <div className="relative overflow-hidden bg-white dark:bg-surface-dark rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200/80 dark:border-border-dark transform transition-all scale-100 opacity-100 flex flex-col gap-5 animate-scale-in">
             <div className="flex items-center gap-4 pb-2 border-b border-slate-100 dark:border-white/[0.05]">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-sm ${
                 editingMovement.tipo === 'ingreso' 
@@ -994,21 +1007,6 @@ export default function Movements() {
             </div>
 
             <div className="space-y-5">
-              {/* Connection Status Card */}
-              {import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL ? (
-                <div className="text-[10px] font-semibold text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl text-center leading-normal flex items-center justify-center gap-1.5 shadow-sm">
-                  <span className={`material-symbols-outlined text-xs ${savingToSheet ? 'animate-spin' : ''}`}>sync</span>
-                  {savingToSheet ? 'Sincronizando cambios...' : 'Conexión activa con Google Sheets'}
-                </div>
-              ) : (
-                <div className="text-[10px] font-semibold text-amber-500 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-center leading-normal flex flex-col gap-1 items-center shadow-sm">
-                  <div className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-xs">cloud_off</span>
-                    Guardado solo local (Sin sincronizar)
-                  </div>
-                </div>
-              )}
-
               {/* Input Monto */}
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-400 uppercase tracking-widest px-1">
@@ -1024,7 +1022,7 @@ export default function Movements() {
                     value={editAmount}
                     onChange={(e) => setEditAmount(e.target.value)}
                     disabled={savingToSheet}
-                    className="w-full bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl py-3.5 pl-11 pr-4 text-base font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-all shadow-sm disabled:opacity-50"
+                    className="w-full bg-slate-50 dark:bg-background-dark/30 border border-slate-200 dark:border-border-dark rounded-xl py-3 pl-11 pr-4 text-base font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary dark:focus:border-primary transition-all disabled:opacity-50"
                     placeholder="0.00"
                   />
                 </div>
@@ -1044,7 +1042,7 @@ export default function Movements() {
                     value={editDate}
                     onChange={(e) => setEditDate(e.target.value)}
                     disabled={savingToSheet}
-                    className="w-full bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-all shadow-sm disabled:opacity-50"
+                    className="w-full bg-slate-50 dark:bg-background-dark/30 border border-slate-200 dark:border-border-dark rounded-xl py-3 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary dark:focus:border-primary transition-all disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -1054,7 +1052,7 @@ export default function Movements() {
               <button
                 onClick={handleSaveEdit}
                 disabled={savingToSheet}
-                className="w-full py-4 px-5 rounded-2xl bg-primary text-white font-bold hover:brightness-105 active:scale-[0.98] transition-all text-center text-sm shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3 px-5 rounded-xl bg-primary text-white font-bold hover:brightness-105 active:scale-[0.98] transition-all text-center text-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {savingToSheet ? (
                   <div className="size-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
@@ -1071,7 +1069,7 @@ export default function Movements() {
                   <button
                     onClick={handleResetEdit}
                     disabled={savingToSheet}
-                    className="w-full py-2.5 px-4 rounded-2xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold transition-colors text-center text-xs flex items-center justify-center gap-1.5 active:scale-[0.98] disabled:opacity-50"
+                    className="w-full py-2 px-4 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold transition-colors text-center text-xs flex items-center justify-center gap-1.5 active:scale-[0.98] disabled:opacity-50"
                   >
                     {savingToSheet ? (
                       <div className="size-3.5 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin"></div>
@@ -1086,7 +1084,7 @@ export default function Movements() {
               <button
                 onClick={() => setEditingMovement(null)}
                 disabled={savingToSheet}
-                className="w-full py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-900/80 transition-colors text-center text-xs active:scale-[0.98] disabled:opacity-50"
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-center text-xs active:scale-[0.98] disabled:opacity-50"
               >
                 Cancelar
               </button>

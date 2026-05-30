@@ -224,8 +224,9 @@ export default function Movements() {
       return;
     }
 
-    const appsScriptUrl = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL;
+    let appsScriptUrl = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL;
     if (appsScriptUrl) {
+      appsScriptUrl = appsScriptUrl.trim().replace(/^['"]|['"]$/g, '');
       try {
         setSavingToSheet(true);
         const sheetName = editingMovement.tipo === 'ingreso' ? 'Ingresos' : 'Gastos';
@@ -277,8 +278,9 @@ export default function Movements() {
   const handleResetEdit = async () => {
     if (!editingMovement) return;
 
-    const appsScriptUrl = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL;
+    let appsScriptUrl = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL;
     if (appsScriptUrl) {
+      appsScriptUrl = appsScriptUrl.trim().replace(/^['"]|['"]$/g, '');
       try {
         setSavingToSheet(true);
         const cleanOriginalAmount = editingMovement.originalAmountStr.replace(/[$,]/g, '');
@@ -318,6 +320,20 @@ export default function Movements() {
 
   useEffect(() => {
     fetchMovements();
+
+    const handleMovementsUpdate = () => {
+      fetchMovements();
+    };
+    window.addEventListener('movementsUpdate', handleMovementsUpdate);
+
+    const interval = setInterval(() => {
+      fetchMovements();
+    }, 60000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('movementsUpdate', handleMovementsUpdate);
+    };
   }, []);
 
   const filteredMovements = movements.filter(m => {

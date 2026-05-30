@@ -15,23 +15,23 @@ const renderMarkdownToHTML = (text) => {
   const flushTable = () => {
     if (tableHeaders.length > 0) {
       let tableHtml = `
-        <div class="overflow-x-auto w-full my-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 shadow-sm">
-          <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs">
-            <thead class="bg-slate-100/50 dark:bg-slate-900/60">
+        <div class="overflow-x-auto w-full my-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-white/40 dark:bg-slate-900/20 shadow-sm">
+          <table class="min-w-full divide-y divide-slate-200/60 dark:divide-slate-700/40 text-[11px]">
+            <thead class="bg-slate-200/50 dark:bg-slate-900/80">
               <tr>
       `;
       tableHeaders.forEach(h => {
-        tableHtml += `<th class="px-4 py-2.5 text-left font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">${parseInlineMarkdownToHTML(h)}</th>`;
+        tableHtml += `<th class="px-3 py-2 text-left font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">${parseInlineMarkdownToHTML(h)}</th>`;
       });
       tableHtml += `
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/40">
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/40 bg-white/10 dark:bg-transparent">
       `;
       tableRows.forEach(row => {
-        tableHtml += `<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors">`;
+        tableHtml += `<tr class="hover:bg-slate-500/5 transition-colors">`;
         row.forEach(cell => {
-          tableHtml += `<td class="px-4 py-2.5 text-slate-700 dark:text-slate-200 font-medium whitespace-nowrap">${parseInlineMarkdownToHTML(cell)}</td>`;
+          tableHtml += `<td class="px-3 py-2 text-slate-700 dark:text-slate-200 font-medium whitespace-nowrap">${parseInlineMarkdownToHTML(cell)}</td>`;
         });
         tableHtml += `</tr>`;
       });
@@ -63,11 +63,11 @@ const renderMarkdownToHTML = (text) => {
       .replace(/>/g, "&gt;");
     
     // Bold: **text**
-    clean = clean.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>');
+    clean = clean.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-950 dark:text-white">$1</strong>');
     // Italic: *text*
     clean = clean.replace(/\*(.*?)\*/g, '<em class="italic text-slate-800 dark:text-slate-200">$1</em>');
     // Inline code: `code`
-    clean = clean.replace(/`(.*?)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-950 text-rose-600 dark:text-rose-400 font-mono text-[11px]">$1</code>');
+    clean = clean.replace(/`(.*?)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-900/60 border border-slate-300/30 dark:border-slate-700/50 text-rose-600 dark:text-rose-400 font-mono text-[10px]">$1</code>');
     return clean;
   };
 
@@ -102,16 +102,16 @@ const renderMarkdownToHTML = (text) => {
           const level = Math.min(line.match(/^#+/)[0].length, 6);
           const cleanText = line.replace(/^#+\s*/, '');
           const classes = {
-            1: 'text-base font-extrabold text-slate-900 dark:text-white mt-4 mb-2',
-            2: 'text-sm font-bold text-slate-900 dark:text-white mt-3 mb-1.5',
-            3: 'text-xs font-bold text-slate-800 dark:text-slate-100 mt-2 mb-1'
-          }[level] || 'text-xs font-bold text-slate-800 dark:text-slate-100 mt-2 mb-1';
+            1: 'text-sm font-extrabold text-slate-900 dark:text-white mt-3 mb-1.5',
+            2: 'text-xs font-bold text-slate-900 dark:text-white mt-2.5 mb-1',
+            3: 'text-[11px] font-bold text-slate-800 dark:text-slate-100 mt-2 mb-0.5'
+          }[level] || 'text-[11px] font-bold text-slate-800 dark:text-slate-100 mt-2 mb-0.5';
           
           html.push(`<h${level} class="${classes}">${parseInlineMarkdownToHTML(cleanText)}</h${level}>`);
         } else if (line.startsWith('- ') || line.startsWith('* ')) {
           if (inList && listType !== 'ul') flushList();
           if (!inList) {
-            html.push('<ul class="list-disc pl-5 my-2 space-y-1 text-slate-700 dark:text-slate-200">');
+            html.push('<ul class="list-disc pl-4 my-1 space-y-0.5 text-slate-700 dark:text-slate-200">');
             inList = true;
             listType = 'ul';
           }
@@ -119,7 +119,7 @@ const renderMarkdownToHTML = (text) => {
         } else if (/^\d+\.\s/.test(line)) {
           if (inList && listType !== 'ol') flushList();
           if (!inList) {
-            html.push('<ol class="list-decimal pl-5 my-2 space-y-1 text-slate-700 dark:text-slate-200">');
+            html.push('<ol class="list-decimal pl-4 my-1 space-y-0.5 text-slate-700 dark:text-slate-200">');
             inList = true;
             listType = 'ol';
           }

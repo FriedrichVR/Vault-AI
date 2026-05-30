@@ -267,6 +267,64 @@ export default function Home() {
       console.error('Error fetching expenses:', error);
     }
 
+    // 3. Fetch Scans
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Scans`;
+      const response = await fetch(url, { credentials: 'omit' });
+      if (response.ok) {
+        const text = await response.text();
+        const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+        if (lines.length >= 2) {
+          const headers = parseCSVRow(lines[0]);
+          const emisorIndex = headers.findIndex(h => h.trim().toLowerCase().includes('emisor'));
+          const montoIndex = headers.findIndex(h => h.trim().toLowerCase().includes('monto'));
+          const fechaIndex = headers.findIndex(h => h.trim().toLowerCase().includes('fecha') || h.trim().toLowerCase().includes('emisi'));
+          const tipoIndex = headers.findIndex(h => h.trim().toLowerCase().includes('tipo'));
+
+          const targetEmisorIndex = emisorIndex !== -1 ? emisorIndex : 0;
+          const targetMontoIndex = montoIndex !== -1 ? montoIndex : 3;
+          const targetFechaIndex = fechaIndex !== -1 ? fechaIndex : 2;
+          const targetTipoIndex = tipoIndex !== -1 ? tipoIndex : 7;
+
+          const rows = lines.slice(1);
+          rows.forEach((row, idx) => {
+            const cols = parseCSVRow(row);
+            const emisor = cols[targetEmisorIndex];
+            const montoStr = cols[targetMontoIndex];
+            const tipoStr = targetTipoIndex !== -1 && cols[targetTipoIndex] ? cols[targetTipoIndex].trim().toLowerCase() : 'gasto';
+            const isIngreso = tipoStr.includes('ingreso');
+
+            if (emisor && montoStr) {
+              let fecha = targetFechaIndex !== -1 && cols[targetFechaIndex] ? cols[targetFechaIndex].trim() : '';
+              if (!fecha) {
+                fecha = getMockDate(emisor, montoStr, idx, isIngreso ? 'ingreso' : 'gasto');
+              }
+
+              const movementId = `scan-${idx}`;
+              const cleanVal = overrides[movementId]?.amountStr !== undefined 
+                ? overrides[movementId].amountStr.replace(/[$,]/g, '')
+                : montoStr.replace(/[$,]/g, '');
+              const cleanFecha = overrides[movementId]?.fecha !== undefined
+                ? overrides[movementId].fecha
+                : fecha;
+              const val = parseFloat(cleanVal);
+              if (!isNaN(val)) {
+                if (isIngreso) {
+                  totalIncomes += val;
+                  fetchedIncomes.push({ fecha: cleanFecha, val });
+                } else {
+                  totalExpenses += val;
+                  fetchedExpenses.push({ fecha: cleanFecha, val });
+                }
+              }
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching scans:', error);
+    }
+
     // Update Movements List States
     setIncomeMovements(fetchedIncomes);
     setExpenseMovements(fetchedExpenses);

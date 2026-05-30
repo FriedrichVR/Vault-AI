@@ -171,6 +171,7 @@ export default function Movements() {
                 tipo: 'ingreso',
                 fecha,
                 categoria: categoria || 'Ingreso Recibido',
+                originSheet: 'Ingresos'
               });
             }
           });
@@ -221,12 +222,70 @@ export default function Movements() {
                 tipo: 'gasto',
                 fecha,
                 categoria: categoria || 'Gasto Realizado',
+                originSheet: 'Gastos'
               });
             }
           });
         }
       } catch (e) {
         console.error('Error fetching expenses:', e);
+      }
+
+      // 3. Fetch Scans
+      try {
+        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Scans`;
+        const response = await fetch(url, { credentials: 'omit' });
+        if (response.ok) {
+          const text = await response.text();
+          const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+          if (lines.length >= 2) {
+            const headers = parseCSVRow(lines[0]);
+            const emisorIndex = headers.findIndex(h => h.trim().toLowerCase().includes('emisor'));
+            const montoIndex = headers.findIndex(h => h.trim().toLowerCase().includes('monto'));
+            const fechaIndex = headers.findIndex(h => h.trim().toLowerCase().includes('fecha') || h.trim().toLowerCase().includes('emisi'));
+            const tipoIndex = headers.findIndex(h => h.trim().toLowerCase().includes('tipo'));
+            const categoriaIndex = headers.findIndex(h => h.trim().toLowerCase().includes('categor'));
+
+            const targetEmisorIndex = emisorIndex !== -1 ? emisorIndex : 0;
+            const targetMontoIndex = montoIndex !== -1 ? montoIndex : 3;
+            const targetFechaIndex = fechaIndex !== -1 ? fechaIndex : 2;
+            const targetTipoIndex = tipoIndex !== -1 ? tipoIndex : 7;
+            const targetCategoriaIndex = categoriaIndex !== -1 ? categoriaIndex : 6;
+
+            const rows = lines.slice(1);
+            rows.forEach((row, idx) => {
+              const cols = parseCSVRow(row);
+              const emisor = cols[targetEmisorIndex];
+              const montoStr = cols[targetMontoIndex];
+              const tipoStr = targetTipoIndex !== -1 && cols[targetTipoIndex] ? cols[targetTipoIndex].trim().toLowerCase() : 'gasto';
+              const isIngreso = tipoStr.includes('ingreso');
+
+              if (emisor && montoStr) {
+                let fecha = targetFechaIndex !== -1 && cols[targetFechaIndex] ? cols[targetFechaIndex].trim() : '';
+                const categoria = targetCategoriaIndex !== -1 && cols[targetCategoriaIndex] ? cols[targetCategoriaIndex].trim() : '';
+                
+                if (!fecha) {
+                  fecha = getMockDate(emisor, montoStr, idx, isIngreso ? 'ingreso' : 'gasto');
+                }
+
+                fetchedMovements.push({
+                  id: `scan-${idx}`,
+                  sheetRow: idx + 2,
+                  title: emisor,
+                  amountStr: montoStr,
+                  originalAmountStr: montoStr,
+                  originalFecha: fecha,
+                  tipo: isIngreso ? 'ingreso' : 'gasto',
+                  fecha,
+                  categoria: categoria || (isIngreso ? 'Ingreso Recibido' : 'Gasto Realizado'),
+                  originSheet: 'Scans'
+                });
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching scans:', e);
       }
 
       const overrides = JSON.parse(localStorage.getItem('movements_overrides') || '{}');
@@ -266,7 +325,7 @@ export default function Movements() {
       appsScriptUrl = appsScriptUrl.trim().replace(/^['"]|['"]$/g, '');
       try {
         setSavingToSheet(true);
-        const sheetName = editingMovement.tipo === 'ingreso' ? 'Ingresos' : 'Gastos';
+        const sheetName = editingMovement.originSheet || (editingMovement.tipo === 'ingreso' ? 'Ingresos' : 'Gastos');
         const payload = {
           sheet: sheetName,
           row: editingMovement.sheetRow,
@@ -322,7 +381,7 @@ export default function Movements() {
         setSavingToSheet(true);
         const cleanOriginalAmount = editingMovement.originalAmountStr.replace(/[$,]/g, '');
         const payload = {
-          sheet: editingMovement.tipo === 'ingreso' ? 'Ingresos' : 'Gastos',
+          sheet: editingMovement.originSheet || (editingMovement.tipo === 'ingreso' ? 'Ingresos' : 'Gastos'),
           row: editingMovement.sheetRow,
           amount: parseFloat(cleanOriginalAmount),
           date: editingMovement.originalFecha

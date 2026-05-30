@@ -27,6 +27,14 @@ const CHART_DATA = {
   ]
 };
 
+const getSpreadsheetId = () => {
+  const envUrl = import.meta.env.VITE_GOOGLE_SHEET_URL;
+  if (!envUrl) return '1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo';
+  const cleanUrl = envUrl.trim().replace(/^['"]|['"]$/g, '');
+  const match = cleanUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return match && match[1] ? match[1] : cleanUrl;
+};
+
 export default function Home() {
   const [currentDate, setCurrentDate] = useState('');
   const [activePeriod, setActivePeriod] = useState('1s');
@@ -100,10 +108,11 @@ export default function Home() {
     let totalIncomes = 0;
     let totalExpenses = 0;
     const overrides = JSON.parse(localStorage.getItem('movements_overrides') || '{}');
+    const sheetId = getSpreadsheetId();
 
     // 1. Fetch Incomes
     try {
-      const url = 'https://docs.google.com/spreadsheets/d/1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo/gviz/tq?tqx=out:csv&sheet=Ingresos';
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Ingresos`;
       const response = await fetch(url, { credentials: 'omit' });
       if (!response.ok) throw new Error('Network response was not ok');
       const text = await response.text();
@@ -138,7 +147,7 @@ export default function Home() {
 
     // 2. Fetch Expenses
     try {
-      const url = 'https://docs.google.com/spreadsheets/d/1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo/gviz/tq?tqx=out:csv&sheet=Gastos';
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Gastos`;
       const response = await fetch(url, { credentials: 'omit' });
       if (!response.ok) throw new Error('Network response was not ok');
       const text = await response.text();

@@ -877,7 +877,7 @@ export default function Movements() {
             className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => !exportLoading && setShowExportModal(false)}
           />
-          <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800 transform transition-all scale-100 opacity-100 flex flex-col gap-6">
+          <div className="relative bg-white dark:bg-slate-950 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-900 transform transition-all scale-100 opacity-100 flex flex-col gap-6">
             <div className="flex flex-col items-center text-center gap-3">
               <div className="w-16 h-16 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary">
                 <span className="material-symbols-outlined text-4xl">download</span>
@@ -900,7 +900,7 @@ export default function Movements() {
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => handleExport('pdf')}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left group"
+                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all text-left group"
                 >
                   <div className="size-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span className="material-symbols-outlined text-2xl">picture_as_pdf</span>
@@ -913,7 +913,7 @@ export default function Movements() {
 
                 <button
                   onClick={() => handleExport('excel')}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left group"
+                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all text-left group"
                 >
                   <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span className="material-symbols-outlined text-2xl">table_chart</span>
@@ -926,7 +926,7 @@ export default function Movements() {
 
                 <button
                   onClick={() => handleExport('csv')}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left group"
+                  className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-900 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all text-left group"
                 >
                   <div className="size-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <span className="material-symbols-outlined text-2xl">csv</span>
@@ -939,7 +939,7 @@ export default function Movements() {
 
                 <button
                   onClick={() => setShowExportModal(false)}
-                  className="mt-2 w-full py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-center"
+                  className="mt-2 w-full py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors text-center"
                 >
                   Cancelar
                 </button>
@@ -956,7 +956,7 @@ export default function Movements() {
             className="absolute inset-0 bg-slate-950/60 dark:bg-black/80 backdrop-blur-md transition-opacity"
             onClick={() => setEditingMovement(null)}
           />
-          <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-[2.5rem] p-7 max-w-sm w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-700/80 transform transition-all scale-100 opacity-100 flex flex-col gap-6 animate-scale-in">
+          <div className="relative overflow-hidden bg-white dark:bg-slate-950 rounded-[2.5rem] p-7 max-w-sm w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-900 transform transition-all scale-100 opacity-100 flex flex-col gap-6 animate-scale-in">
             {/* Top Accent Gradient Line */}
             <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${
               editingMovement.tipo === 'ingreso'
@@ -1024,7 +1024,7 @@ export default function Movements() {
                     value={editAmount}
                     onChange={(e) => setEditAmount(e.target.value)}
                     disabled={savingToSheet}
-                    className="w-full bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-950 rounded-2xl py-3.5 pl-11 pr-4 text-base font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-all shadow-sm disabled:opacity-50"
+                    className="w-full bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl py-3.5 pl-11 pr-4 text-base font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-all shadow-sm disabled:opacity-50"
                     placeholder="0.00"
                   />
                 </div>
@@ -1044,7 +1044,7 @@ export default function Movements() {
                     value={editDate}
                     onChange={(e) => setEditDate(e.target.value)}
                     disabled={savingToSheet}
-                    className="w-full bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-950 rounded-2xl py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-all shadow-sm disabled:opacity-50"
+                    className="w-full bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-all shadow-sm disabled:opacity-50"
                   />
                 </div>
               </div>

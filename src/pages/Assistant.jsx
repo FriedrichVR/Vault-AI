@@ -1,6 +1,146 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const renderMarkdownToHTML = (text) => {
+  if (!text) return '';
+
+  const lines = text.split('\n');
+  const html = [];
+  let inTable = false;
+  let tableHeaders = [];
+  let tableRows = [];
+  let inList = false;
+  let listType = null; // 'ul' or 'ol'
+
+  const flushTable = () => {
+    if (tableHeaders.length > 0) {
+      let tableHtml = `
+        <div class="overflow-x-auto w-full my-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 shadow-sm">
+          <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+            <thead class="bg-slate-100/50 dark:bg-slate-900/60">
+              <tr>
+      `;
+      tableHeaders.forEach(h => {
+        tableHtml += `<th class="px-4 py-2.5 text-left font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">${parseInlineMarkdownToHTML(h)}</th>`;
+      });
+      tableHtml += `
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/40">
+      `;
+      tableRows.forEach(row => {
+        tableHtml += `<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors">`;
+        row.forEach(cell => {
+          tableHtml += `<td class="px-4 py-2.5 text-slate-700 dark:text-slate-200 font-medium whitespace-nowrap">${parseInlineMarkdownToHTML(cell)}</td>`;
+        });
+        tableHtml += `</tr>`;
+      });
+      tableHtml += `
+            </tbody>
+          </table>
+        </div>
+      `;
+      html.push(tableHtml);
+      tableHeaders = [];
+      tableRows = [];
+    }
+    inTable = false;
+  };
+
+  const flushList = () => {
+    if (inList) {
+      html.push(`</${listType}>`);
+      inList = false;
+      listType = null;
+    }
+  };
+
+  const parseInlineMarkdownToHTML = (str) => {
+    if (!str) return '';
+    let clean = str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    
+    // Bold: **text**
+    clean = clean.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>');
+    // Italic: *text*
+    clean = clean.replace(/\*(.*?)\*/g, '<em class="italic text-slate-800 dark:text-slate-200">$1</em>');
+    // Inline code: `code`
+    clean = clean.replace(/`(.*?)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-950 text-rose-600 dark:text-rose-400 font-mono text-[11px]">$1</code>');
+    return clean;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Check if it's a table row
+    if (line.startsWith('|') && line.endsWith('|')) {
+      if (inList) flushList();
+      
+      const cells = line.split('|')
+        .slice(1, -1)
+        .map(c => c.trim());
+
+      if (!inTable) {
+        inTable = true;
+        tableHeaders = cells;
+      } else {
+        const isSeparator = cells.every(c => /^:?-+:?$/.test(c));
+        if (isSeparator) {
+          continue;
+        } else {
+          tableRows.push(cells);
+        }
+      }
+    } else {
+      if (inTable) flushTable();
+      
+      if (line) {
+        if (line.startsWith('#')) {
+          if (inList) flushList();
+          const level = Math.min(line.match(/^#+/)[0].length, 6);
+          const cleanText = line.replace(/^#+\s*/, '');
+          const classes = {
+            1: 'text-base font-extrabold text-slate-900 dark:text-white mt-4 mb-2',
+            2: 'text-sm font-bold text-slate-900 dark:text-white mt-3 mb-1.5',
+            3: 'text-xs font-bold text-slate-800 dark:text-slate-100 mt-2 mb-1'
+          }[level] || 'text-xs font-bold text-slate-800 dark:text-slate-100 mt-2 mb-1';
+          
+          html.push(`<h${level} class="${classes}">${parseInlineMarkdownToHTML(cleanText)}</h${level}>`);
+        } else if (line.startsWith('- ') || line.startsWith('* ')) {
+          if (inList && listType !== 'ul') flushList();
+          if (!inList) {
+            html.push('<ul class="list-disc pl-5 my-2 space-y-1 text-slate-700 dark:text-slate-200">');
+            inList = true;
+            listType = 'ul';
+          }
+          html.push(`<li>${parseInlineMarkdownToHTML(line.substring(2))}</li>`);
+        } else if (/^\d+\.\s/.test(line)) {
+          if (inList && listType !== 'ol') flushList();
+          if (!inList) {
+            html.push('<ol class="list-decimal pl-5 my-2 space-y-1 text-slate-700 dark:text-slate-200">');
+            inList = true;
+            listType = 'ol';
+          }
+          const index = line.indexOf(' ');
+          html.push(`<li>${parseInlineMarkdownToHTML(line.substring(index + 1))}</li>`);
+        } else {
+          if (inList) flushList();
+          html.push(`<p class="text-slate-700 dark:text-slate-200 leading-relaxed">${parseInlineMarkdownToHTML(line)}</p>`);
+        }
+      } else {
+        if (inList) flushList();
+      }
+    }
+  }
+
+  if (inTable) flushTable();
+  if (inList) flushList();
+
+  return html.join('\n');
+};
+
 export default function Assistant() {
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState(
@@ -219,9 +359,10 @@ export default function Assistant() {
               </div>
               <div className="flex flex-1 flex-col gap-3 items-start">
                 <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold px-1 uppercase tracking-widest">Asistente</p>
-                <div className="text-sm font-normal leading-relaxed max-w-[90%] rounded-2xl px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 shadow-sm whitespace-pre-wrap">
-                  {msg.content}
-                </div>
+                <div 
+                  className="text-sm font-normal leading-relaxed max-w-[90%] rounded-2xl px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-800 dark:text-slate-100 shadow-sm space-y-2 overflow-hidden"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdownToHTML(msg.content) }}
+                />
 
                 {msg.hasGraph && (
                   <div className="w-full max-w-md rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 p-5 shadow-lg">

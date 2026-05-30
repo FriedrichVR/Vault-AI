@@ -88,7 +88,7 @@ export default function Profile() {
     // 1. Fetch Incomes
     try {
       const url = 'https://docs.google.com/spreadsheets/d/1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo/gviz/tq?tqx=out:csv&sheet=Ingresos';
-      const response = await fetch(url);
+      const response = await fetch(url, { credentials: 'omit' });
       if (!response.ok) throw new Error('Network response was not ok');
       const text = await response.text();
       const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
@@ -129,7 +129,7 @@ export default function Profile() {
     // 2. Fetch Expenses
     try {
       const url = 'https://docs.google.com/spreadsheets/d/1RXLR_5kmdVgLP9Mej6E7UZKHYuZsCIFrkKailYUVnDo/gviz/tq?tqx=out:csv&sheet=Gastos';
-      const response = await fetch(url);
+      const response = await fetch(url, { credentials: 'omit' });
       if (!response.ok) throw new Error('Network response was not ok');
       const text = await response.text();
       const lines = text.split('\n').map(line => line.trim()).filter(Boolean);

@@ -19,6 +19,9 @@ export default function Profile() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [useTestWebhook, setUseTestWebhook] = useState(
+    localStorage.getItem('use_test_webhook') === 'true'
+  );
   const [currency, setCurrency] = useState(() => {
     const code = localStorage.getItem('userCurrency') || 'ARS';
     const configs = {
@@ -54,6 +57,12 @@ export default function Profile() {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
+  };
+
+  const toggleWebhookMode = () => {
+    const newValue = !useTestWebhook;
+    setUseTestWebhook(newValue);
+    localStorage.setItem('use_test_webhook', newValue.toString());
   };
 
   const handleCurrencyChange = (code) => {
@@ -597,6 +606,24 @@ export default function Profile() {
         <h2 className="text-[10px] font-bold tracking-[0.1em] text-slate-500 dark:text-slate-400 uppercase mt-8 mb-2 px-1">App</h2>
         
         <div className="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-2xl overflow-hidden shadow-lg">
+          {/* Webhook Test Mode Toggle */}
+          <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-dark">
+            <div className="flex items-center gap-3">
+              <div className="size-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[18px]">bug_report</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">Modo Test Webhook</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Usa la URL de pruebas webhook-test de n8n</p>
+              </div>
+            </div>
+            {/* Toggle Switch */}
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" checked={useTestWebhook} onChange={toggleWebhookMode} className="sr-only peer" />
+              <div className="w-9 h-5 bg-slate-200 dark:bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+
           <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-dark">
             <div className="flex items-center gap-3">
               <div className="size-8 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center">

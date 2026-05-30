@@ -12,9 +12,16 @@ export default function Scan() {
   const [notification, setNotification] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(null); // String con el mensaje de error
-  const WEBHOOK_URL = import.meta.env.DEV 
-    ? "/api-n8n/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d"
-    : "https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
+  const getWebhookUrl = () => {
+    const isTestMode = localStorage.getItem('use_test_webhook') === 'true';
+    if (isTestMode) {
+      return "https://n8n.srv1202174.hstgr.cloud/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
+    }
+    return import.meta.env.DEV 
+      ? "/api-n8n/webhook-test/b45a5a67-7e9d-4e80-9e18-09e1733eba6d"
+      : "https://n8n.srv1202174.hstgr.cloud/webhook/b45a5a67-7e9d-4e80-9e18-09e1733eba6d";
+  };
+  const WEBHOOK_URL = getWebhookUrl();
 
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];

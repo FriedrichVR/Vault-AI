@@ -1,30 +1,57 @@
 import { useState, useEffect } from 'react';
 
 // Static Data moved outside component to prevent re-creation on render
-const CHART_DATA = {
-  '1s': [
-    { label: 'Lun', height: '35%', active: false },
-    { label: 'Mar', height: '60%', active: false },
-    { label: 'Mié', height: '40%', active: false },
-    { label: 'Jue', height: '85%', active: true },
-    { label: 'Vie', height: '50%', active: false },
-    { label: 'Sáb', height: '25%', active: false },
-    { label: 'Dom', height: '15%', active: false },
-  ],
-  '1m': [
-    { label: 'Sem 1', height: '45%', active: false },
-    { label: 'Sem 2', height: '75%', active: false },
-    { label: 'Sem 3', height: '90%', active: true },
-    { label: 'Sem 4', height: '60%', active: false },
-  ],
-  '1a': [
-    { label: 'E', height: '40%', active: false }, { label: 'F', height: '30%', active: false },
-    { label: 'M', height: '65%', active: false }, { label: 'A', height: '45%', active: false },
-    { label: 'M', height: '80%', active: false }, { label: 'J', height: '35%', active: false },
-    { label: 'J', height: '55%', active: false }, { label: 'A', height: '60%', active: false },
-    { label: 'S', height: '90%', active: true }, { label: 'O', height: '70%', active: false },
-    { label: 'N', height: '65%', active: false }, { label: 'D', height: '50%', active: false },
-  ]
+const MOCK_CHART_DATA = {
+  ingresos: {
+    '1s': [
+      { label: 'Lun', height: '40%', active: false },
+      { label: 'Mar', height: '30%', active: false },
+      { label: 'Mié', height: '80%', active: false },
+      { label: 'Jue', height: '35%', active: false },
+      { label: 'Vie', height: '90%', active: true },
+      { label: 'Sáb', height: '20%', active: false },
+      { label: 'Dom', height: '10%', active: false },
+    ],
+    '1m': [
+      { label: 'Sem 1', height: '60%', active: false },
+      { label: 'Sem 2', height: '80%', active: false },
+      { label: 'Sem 3', height: '45%', active: true },
+      { label: 'Sem 4', height: '70%', active: false },
+    ],
+    '1a': [
+      { label: 'E', height: '50%', active: false }, { label: 'F', height: '60%', active: false },
+      { label: 'M', height: '40%', active: false }, { label: 'A', height: '70%', active: false },
+      { label: 'M', height: '85%', active: true }, { label: 'J', height: '30%', active: false },
+      { label: 'J', height: '45%', active: false }, { label: 'A', height: '55%', active: false },
+      { label: 'S', height: '65%', active: false }, { label: 'O', height: '50%', active: false },
+      { label: 'N', height: '75%', active: false }, { label: 'D', height: '80%', active: false },
+    ]
+  },
+  gastos: {
+    '1s': [
+      { label: 'Lun', height: '35%', active: false },
+      { label: 'Mar', height: '60%', active: false },
+      { label: 'Mié', height: '40%', active: false },
+      { label: 'Jue', height: '85%', active: true },
+      { label: 'Vie', height: '50%', active: false },
+      { label: 'Sáb', height: '25%', active: false },
+      { label: 'Dom', height: '15%', active: false },
+    ],
+    '1m': [
+      { label: 'Sem 1', height: '45%', active: false },
+      { label: 'Sem 2', height: '75%', active: false },
+      { label: 'Sem 3', height: '90%', active: true },
+      { label: 'Sem 4', height: '60%', active: false },
+    ],
+    '1a': [
+      { label: 'E', height: '40%', active: false }, { label: 'F', height: '30%', active: false },
+      { label: 'M', height: '65%', active: false }, { label: 'A', height: '45%', active: false },
+      { label: 'M', height: '80%', active: false }, { label: 'J', height: '35%', active: false },
+      { label: 'J', height: '55%', active: false }, { label: 'A', height: '60%', active: false },
+      { label: 'S', height: '90%', active: true }, { label: 'O', height: '70%', active: false },
+      { label: 'N', height: '65%', active: false }, { label: 'D', height: '50%', active: false },
+    ]
+  }
 };
 
 const getSpreadsheetId = () => {
@@ -35,7 +62,45 @@ const getSpreadsheetId = () => {
   return match && match[1] ? match[1] : cleanUrl;
 };
 
+const getMockDate = (title, amountStr, index, tipo) => {
+  const cleanTitle = title.trim();
+  if (cleanTitle === 'Sueldo1') return '2026-05-29';
+  if (cleanTitle === 'XR') return '2026-05-28';
+  if (cleanTitle === 'Sal24') return '2026-05-27';
+  if (cleanTitle === 'Super LA') {
+    const cleanVal = amountStr.replace(/[$,]/g, '');
+    const val = parseFloat(cleanVal);
+    if (val === 555600) return '2026-05-26';
+    if (val === 23471563) return '2026-05-25';
+  }
+  const d = new Date();
+  d.setDate(d.getDate() - (index + (tipo === 'gasto' ? 3 : 0)));
+  return d.toISOString().slice(0, 10);
+};
+
+const formatDateToInput = (dateStr) => {
+  if (!dateStr) return '';
+  const clean = dateStr.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) return clean;
+  const dmyMatch = clean.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (dmyMatch) {
+    const [_, d, m, y] = dmyMatch;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+  const ymdMatch = clean.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/);
+  if (ymdMatch) {
+    const [_, y, m, d] = ymdMatch;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+  const parsed = new Date(clean);
+  if (!isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+  return '';
+};
+
 export default function Home() {
+  const [incomeMovements, setIncomeMovements] = useState([]);
+  const [expenseMovements, setExpenseMovements] = useState([]);
+  const [chartMode, setChartMode] = useState('gastos'); // 'ingresos' or 'gastos'
   const [currentDate, setCurrentDate] = useState('');
   const [activePeriod, setActivePeriod] = useState('1s');
   const [currency, setCurrency] = useState(() => {
@@ -109,6 +174,8 @@ export default function Home() {
     let totalExpenses = 0;
     const overrides = JSON.parse(localStorage.getItem('movements_overrides') || '{}');
     const sheetId = getSpreadsheetId();
+    const fetchedIncomes = [];
+    const fetchedExpenses = [];
 
     // 1. Fetch Incomes
     try {
@@ -121,6 +188,7 @@ export default function Home() {
         const headers = parseCSVRow(lines[0]);
         const emisorIndex = headers.findIndex(h => h.trim().toLowerCase().includes('emisor'));
         const montoIndex = headers.findIndex(h => h.trim().toLowerCase().includes('monto'));
+        const fechaIndex = headers.findIndex(h => h.trim().toLowerCase().includes('fecha'));
         const targetEmisorIndex = emisorIndex !== -1 ? emisorIndex : 0;
         const targetMontoIndex = montoIndex !== -1 ? montoIndex : 1;
 
@@ -130,13 +198,22 @@ export default function Home() {
           const emisor = cols[targetEmisorIndex];
           const montoStr = cols[targetMontoIndex];
           if (emisor && montoStr) {
+            let fecha = fechaIndex !== -1 && cols[fechaIndex] ? cols[fechaIndex].trim() : '';
+            if (!fecha) {
+              fecha = getMockDate(emisor, montoStr, idx, 'ingreso');
+            }
+            
             const movementId = `ingreso-${idx}`;
             const cleanVal = overrides[movementId]?.amountStr !== undefined 
               ? overrides[movementId].amountStr.replace(/[$,]/g, '')
               : montoStr.replace(/[$,]/g, '');
+            const cleanFecha = overrides[movementId]?.fecha !== undefined
+              ? overrides[movementId].fecha
+              : fecha;
             const val = parseFloat(cleanVal);
             if (!isNaN(val)) {
               totalIncomes += val;
+              fetchedIncomes.push({ fecha: cleanFecha, val });
             }
           }
         });
@@ -156,6 +233,7 @@ export default function Home() {
         const headers = parseCSVRow(lines[0]);
         const emisorIndex = headers.findIndex(h => h.trim().toLowerCase().includes('emisor'));
         const montoIndex = headers.findIndex(h => h.trim().toLowerCase().includes('monto'));
+        const fechaIndex = headers.findIndex(h => h.trim().toLowerCase().includes('fecha'));
         const targetEmisorIndex = emisorIndex !== -1 ? emisorIndex : 0;
         const targetMontoIndex = montoIndex !== -1 ? montoIndex : 1;
 
@@ -165,13 +243,22 @@ export default function Home() {
           const emisor = cols[targetEmisorIndex];
           const montoStr = cols[targetMontoIndex];
           if (emisor && montoStr) {
+            let fecha = fechaIndex !== -1 && cols[fechaIndex] ? cols[fechaIndex].trim() : '';
+            if (!fecha) {
+              fecha = getMockDate(emisor, montoStr, idx, 'gasto');
+            }
+
             const movementId = `gasto-${idx}`;
             const cleanVal = overrides[movementId]?.amountStr !== undefined 
               ? overrides[movementId].amountStr.replace(/[$,]/g, '')
               : montoStr.replace(/[$,]/g, '');
+            const cleanFecha = overrides[movementId]?.fecha !== undefined
+              ? overrides[movementId].fecha
+              : fecha;
             const val = parseFloat(cleanVal);
             if (!isNaN(val)) {
               totalExpenses += val;
+              fetchedExpenses.push({ fecha: cleanFecha, val });
             }
           }
         });
@@ -179,6 +266,10 @@ export default function Home() {
     } catch (error) {
       console.error('Error fetching expenses:', error);
     }
+
+    // Update Movements List States
+    setIncomeMovements(fetchedIncomes);
+    setExpenseMovements(fetchedExpenses);
 
     // 3. Update States and LocalStorage
     setIncome(totalIncomes);
@@ -218,7 +309,105 @@ export default function Home() {
 
 
 
-  const currentChart = CHART_DATA[activePeriod];
+  const getChartData = () => {
+    const movements = chartMode === 'ingresos' ? incomeMovements : expenseMovements;
+    const total = movements.reduce((acc, curr) => acc + curr.val, 0);
+    if (total === 0) {
+      return MOCK_CHART_DATA[chartMode][activePeriod];
+    }
+    
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    
+    if (activePeriod === '1s') {
+      const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      const values = Array(7).fill(0);
+      
+      const startOfWeek = new Date(now);
+      const day = startOfWeek.getDay();
+      const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+      startOfWeek.setDate(diff);
+      startOfWeek.setHours(0,0,0,0);
+      
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(endOfWeek.getDate() + 6);
+      endOfWeek.setHours(23,59,59,999);
+      
+      movements.forEach(m => {
+        if (!m.fecha) return;
+        const inputDate = formatDateToInput(m.fecha);
+        const d = new Date(inputDate + 'T12:00:00');
+        if (d >= startOfWeek && d <= endOfWeek) {
+          const dayIdx = (d.getDay() + 6) % 7;
+          values[dayIdx] += m.val;
+        }
+      });
+      
+      const maxVal = Math.max(...values, 100);
+      const currentDayIdx = (now.getDay() + 6) % 7;
+      
+      return days.map((label, idx) => ({
+        label,
+        val: values[idx],
+        height: `${Math.max(5, Math.round((values[idx] / maxVal) * 100))}%`,
+        active: idx === currentDayIdx
+      }));
+    }
+    
+    if (activePeriod === '1m') {
+      const weeks = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+      const values = Array(4).fill(0);
+      
+      movements.forEach(m => {
+        if (!m.fecha) return;
+        const inputDate = formatDateToInput(m.fecha);
+        const d = new Date(inputDate + 'T12:00:00');
+        if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
+          const weekIdx = Math.min(3, Math.floor((d.getDate() - 1) / 7));
+          values[weekIdx] += m.val;
+        }
+      });
+      
+      const maxVal = Math.max(...values, 100);
+      const currentWeekIdx = Math.min(3, Math.floor((now.getDate() - 1) / 7));
+      
+      return weeks.map((label, idx) => ({
+        label,
+        val: values[idx],
+        height: `${Math.max(5, Math.round((values[idx] / maxVal) * 100))}%`,
+        active: idx === currentWeekIdx
+      }));
+    }
+    
+    if (activePeriod === '1a') {
+      const monthsLabels = ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+      const values = Array(12).fill(0);
+      
+      movements.forEach(m => {
+        if (!m.fecha) return;
+        const inputDate = formatDateToInput(m.fecha);
+        const d = new Date(inputDate + 'T12:00:00');
+        if (d.getFullYear() === currentYear) {
+          const monthIdx = d.getMonth();
+          values[monthIdx] += m.val;
+        }
+      });
+      
+      const maxVal = Math.max(...values, 100);
+      const currentMonthIdx = now.getMonth();
+      
+      return monthsLabels.map((label, idx) => ({
+        label,
+        val: values[idx],
+        height: `${Math.max(5, Math.round((values[idx] / maxVal) * 100))}%`,
+        active: idx === currentMonthIdx
+      }));
+    }
+    return [];
+  };
+
+  const currentChart = getChartData();
 
   // Dynamic Flow and Progress Calculations
   const netFlow = income - gastos;
@@ -288,79 +477,110 @@ export default function Home() {
 
       {/* Spending Trends Card */}
       <section className="mb-8 animate-slide-up delay-200">
-        <div className="px-2">
-          {/* Header Area */}
-          <div className="flex items-start justify-between mb-8">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Tendencias de Gastos</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Fecha actual</p>
-              <span id="current-date-display" className="text-[10px] font-medium tracking-wider text-slate-500">
-                {currentDate}
-              </span>
+        {/* Header Area */}
+        <div className="flex items-start justify-between mb-8 px-1">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Tendencias de {chartMode === 'ingresos' ? 'Ingresos' : 'Gastos'}
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Fecha actual</p>
+            <span id="current-date-display" className="text-[10px] font-medium tracking-wider text-slate-500">
+              {currentDate}
+            </span>
+          </div>
+          {/* Time & Flow Toggles - Modern Pill Style */}
+          <div className="flex flex-col items-end gap-2">
+            {/* Period Toggles (1s, 1m, 1a) */}
+            <div id="chart-toggles" className="flex w-[150px] gap-0.5 p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200/50 dark:border-white/5">
+              {['1s', '1m', '1a'].map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setActivePeriod(period)}
+                  className={`${
+                    activePeriod === period
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/5'
+                  } flex-1 text-[9px] font-bold py-1.5 rounded-lg transition-all duration-200 uppercase tracking-wider text-center flex items-center justify-center`}
+                >
+                  {period}
+                </button>
+              ))}
             </div>
-            {/* Time Toggles - Modern Pill Style */}
-            <div className="flex flex-col items-end gap-1.5">
-              <div id="chart-toggles" className="flex gap-1 p-1.5 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5">
-                {['1s', '1m', '1a'].map((period) => (
-                  <button
-                    key={period}
-                    onClick={() => setActivePeriod(period)}
-                    className={`${
-                      activePeriod === period
-                        ? 'bg-primary text-white'
-                        : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-white/5'
-                    } text-[10px] font-bold px-4 py-2 rounded-xl transition-all duration-300 uppercase tracking-wider`}
-                  >
-                    {period}
-                  </button>
-                ))}
-              </div>
+
+            {/* Flow Toggles (Ingresos / Gastos) */}
+            <div className="flex w-[150px] gap-0.5 p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200/50 dark:border-white/5">
+              <button
+                onClick={() => setChartMode('ingresos')}
+                className={`${
+                  chartMode === 'ingresos'
+                    ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/20'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/5'
+                } flex-1 text-[9px] font-bold py-1.5 rounded-lg transition-all duration-200 uppercase tracking-wider text-center flex items-center justify-center`}
+              >
+                Ingresos
+              </button>
+              <button
+                onClick={() => setChartMode('gastos')}
+                className={`${
+                  chartMode === 'gastos'
+                    ? 'bg-rose-500 text-white shadow-sm shadow-rose-500/20'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/5'
+                } flex-1 text-[9px] font-bold py-1.5 rounded-lg transition-all duration-200 uppercase tracking-wider text-center flex items-center justify-center`}
+              >
+                Gastos
+              </button>
             </div>
           </div>
-          
-          {/* Bar Chart Section - Card Like Container */}
-          <div className="relative mt-2 p-6 rounded-3xl bg-white dark:bg-surface-dark/40 shadow-sm border border-slate-100 dark:border-white/[0.02]">
-            {/* Grid Reference Lines */}
-            <div className="absolute inset-x-0 inset-y-0 flex flex-col justify-between pointer-events-none pr-2">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="w-full border-t border-slate-100 dark:border-white/5 h-0"></div>
-              ))}
-              <div className="w-full h-0"></div> {/* Bottom line */}
-            </div>
+        </div>
+        
+        {/* Bar Chart Section - Card Like Container */}
+        <div className="relative p-6 rounded-2xl bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark shadow-lg">
+          {/* Grid Reference Lines */}
+          <div className="absolute inset-x-0 inset-y-0 flex flex-col justify-between pointer-events-none pr-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="w-full border-t border-slate-100 dark:border-white/5 h-0"></div>
+            ))}
+            <div className="w-full h-0"></div> {/* Bottom line */}
+          </div>
 
-            {/* Bars Container */}
-            <div id="chart-container" className="relative flex items-end justify-between h-48 w-full gap-2 pt-8">
-              {currentChart.map((bar, index) => (
-                <div key={index} className="group flex flex-col items-center justify-end flex-1 gap-3 h-full relative">
-                  {/* Tooltip on Hover */}
-                  <div className="absolute -top-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-20 pointer-events-none">
-                    <div className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-bold px-2 py-1 rounded shadow-xl whitespace-nowrap">
-                      {bar.height.replace('%', '') * 10} USD
-                    </div>
+          {/* Bars Container */}
+          <div id="chart-container" className="relative flex items-end justify-between h-48 w-full gap-2 pt-8">
+            {currentChart.map((bar, index) => (
+              <div key={index} className="group flex flex-col items-center justify-end flex-1 gap-3 h-full relative">
+                {/* Tooltip on Hover */}
+                <div className="absolute -top-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-20 pointer-events-none">
+                  <div className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[9px] font-bold px-2 py-1 rounded shadow-xl whitespace-nowrap">
+                    {currency.symbol}{(bar.val !== undefined ? Math.round(bar.val) : Math.round(parseFloat(bar.height) * 120)).toLocaleString('es-ES')}
                   </div>
-
-                  {/* Bar */}
-                  <div 
-                    className={`w-full max-w-[18px] rounded-sm relative ${
-                      bar.active 
-                        ? 'bg-primary z-10' 
-                        : 'bg-slate-200/50 dark:bg-[#1e1e2d]/60'
-                    }`} 
-                    style={{ 
-                      height: bar.height
-                    }}
-                  >
-                  </div>
-
-                  {/* Label */}
-                  <span className={`text-[9px] font-bold uppercase tracking-tighter ${
-                    bar.active ? 'text-primary' : 'text-slate-400 dark:text-slate-500'
-                  }`}>
-                    {bar.label}
-                  </span>
                 </div>
-              ))}
-            </div>
+
+                {/* Bar */}
+                <div 
+                  className={`w-full max-w-[18px] rounded-t-sm relative transition-all duration-300 ${
+                    chartMode === 'ingresos'
+                      ? bar.active
+                        ? 'bg-emerald-500 z-10 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
+                        : 'bg-emerald-500/25 dark:bg-emerald-500/20 hover:bg-emerald-500/45'
+                      : bar.active
+                        ? 'bg-rose-500 z-10 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
+                        : 'bg-rose-500/25 dark:bg-rose-500/20 hover:bg-rose-500/45'
+                  }`} 
+                  style={{ 
+                    height: bar.height
+                  }}
+                >
+                </div>
+
+                {/* Label */}
+                <span className={`text-[9px] font-bold uppercase tracking-tighter transition-colors duration-300 ${
+                  bar.active 
+                    ? chartMode === 'ingresos' ? 'text-emerald-500' : 'text-rose-500' 
+                    : 'text-slate-400 dark:text-slate-500'
+                }`}>
+                  {bar.label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </section>

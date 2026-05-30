@@ -92,6 +92,43 @@
     
     /* Convertir elementos fijos de viewport, a fijos de contenedor rel (absolutos) */
     .fixed { position: absolute !important; }
+
+    /* Ajustar tamaño del simulador en pantallas con poca altura vertical */
+    @media (max-height: 900px) {
+        body {
+            transform: scale(0.95);
+            transform-origin: center center;
+            margin: 0.5rem auto !important;
+        }
+    }
+    @media (max-height: 850px) {
+        body {
+            transform: scale(0.9);
+            transform-origin: center center;
+            margin: 0rem auto !important;
+        }
+    }
+    @media (max-height: 800px) {
+        body {
+            transform: scale(0.85);
+            transform-origin: center center;
+            margin: -1rem auto !important;
+        }
+    }
+    @media (max-height: 740px) {
+        body {
+            transform: scale(0.8);
+            transform-origin: center center;
+            margin: -2rem auto !important;
+        }
+    }
+    @media (max-height: 680px) {
+        body {
+            transform: scale(0.75);
+            transform-origin: center center;
+            margin: -3rem auto !important;
+        }
+    }
 }
 
 @keyframes scan {

@@ -145,7 +145,7 @@ export default function Assistant() {
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState(
     localStorage.getItem('userAvatar') ||
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuDKFeVTPWLSPgaVLGhnkPXNO3BKiEVny_1TaMamGFpVp-3SF7fFmZ2EjHxs9ayimbsucHyxXRCXKeDcu6CKZsQBRhh2sz-UgPwyIlZLpLLH0xuG-_sTJBjxOBBjNE1Y3o06TC1sCZkT49BK1xYfHCzdKr2iKCDaNxEq3ssTRZUqf-fUdl5PzN4IqqQHR2ZS25lHDi-jk-jXDbTobg4arWCxK4BlR064Xprs-_U6zwor_i1huTWfwfDxNMVnM9urJQJvWvX85cVOAIs"
+    "images/Fede.jpg"
   );
 
   const [messages, setMessages] = useState([

@@ -144,12 +144,13 @@ export default function Scan() {
 
       {/* Viewfinder Area */}
       <div className="relative flex-1 bg-neutral-900 overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 opacity-40">
-          <img
-            alt="Fondo de cámara"
-            className="w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvzNhIt9_Y8pDqFhsbPkJEhIb5hiQO2dxbM3tibreeTynsTlm5Fnqo45HdjV5QSmljW1Kj5N9h59e2Mrxft4vcLX8ycH6QqzTqVsrLSz-uVcpUr0WkLLRBr9F_7TmYAlHQIQxKDMqbroRFMY7Avt3WspvbPOtiLXv6y9taxHqxmmMjrAI0lXaSsQDVfkYbQpC6XsU-sDIb9UBOPXSjJkNUxIEJC-8kUDNU_qcobNmRVNFmqJqbS0wjr0D1nPVjv0bH8tyYXsW4MPA"
-          />
+        <div className="absolute inset-0 bg-neutral-950 flex flex-col items-center justify-center select-none">
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 opacity-5 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:16px_16px]"></div>
+          {/* Glowing camera lens simulation */}
+          <div className="size-36 rounded-full bg-primary/5 border border-primary/15 flex items-center justify-center animate-pulse">
+            <span className="material-symbols-outlined text-white/10 !text-6xl">camera</span>
+          </div>
         </div>
 
         <div className="relative w-4/5 h-3/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-[2px]">

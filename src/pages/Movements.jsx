@@ -256,7 +256,7 @@ export default function Movements() {
         });
       } catch (error) {
         console.error('Error saving to Google Sheets:', error);
-        alert('Error al sincronizar con Google Sheets: ' + error.message + '\nLos cambios se aplicarán solo de forma local.');
+        alert('Error al sincronizar con Google Sheets. Los cambios se aplicarán solo de forma local.');
       } finally {
         setSavingToSheet(false);
       }
@@ -286,7 +286,7 @@ export default function Movements() {
 
   const handleResetEdit = async () => {
     if (!editingMovement) return;
-
+    
     let appsScriptUrl = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL;
     if (appsScriptUrl) {
       appsScriptUrl = appsScriptUrl.trim().replace(/^['"]|['"]$/g, '');
@@ -310,14 +310,12 @@ export default function Movements() {
         });
       } catch (error) {
         console.error('Error resetting Google Sheets:', error);
-        alert('Error al restaurar en Google Sheets: ' + error.message);
-        setSavingToSheet(false);
-        return;
+        alert('Error al restaurar en Google Sheets. Los cambios se aplicarán de forma local.');
       } finally {
         setSavingToSheet(false);
       }
     }
-    
+
     const overrides = JSON.parse(localStorage.getItem('movements_overrides') || '{}');
     delete overrides[editingMovement.id];
     localStorage.setItem('movements_overrides', JSON.stringify(overrides));
@@ -776,6 +774,25 @@ export default function Movements() {
           >
             <span className="material-symbols-outlined text-lg">download</span>
           </button>
+          {(() => {
+            const overrides = JSON.parse(localStorage.getItem('movements_overrides') || '{}');
+            const hasOverrides = Object.keys(overrides).length > 0;
+            return hasOverrides && (
+              <button 
+                onClick={() => {
+                  if (confirm('¿Deseas restaurar todos los valores originales de Google Sheets y borrar los cambios locales?')) {
+                    localStorage.removeItem('movements_overrides');
+                    fetchMovements();
+                    window.dispatchEvent(new Event('movementsUpdate'));
+                  }
+                }}
+                className="flex items-center justify-center p-2.5 bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/20 dark:border-orange-500/30 rounded-xl text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-all shadow-sm"
+                title="Restaurar valores de Google Sheets"
+              >
+                <span className="material-symbols-outlined text-lg">restart_alt</span>
+              </button>
+            );
+          })()}
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           <button 
@@ -936,89 +953,114 @@ export default function Movements() {
       {editingMovement && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"
+            className="absolute inset-0 bg-slate-950/60 dark:bg-black/80 backdrop-blur-md transition-opacity"
             onClick={() => setEditingMovement(null)}
           />
-          <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800 transform transition-all scale-100 opacity-100 flex flex-col gap-6 animate-scale-in">
-            <div className="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${
+          <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-[2.5rem] p-7 max-w-sm w-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-700/80 transform transition-all scale-100 opacity-100 flex flex-col gap-6 animate-scale-in">
+            {/* Top Accent Gradient Line */}
+            <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${
+              editingMovement.tipo === 'ingreso'
+                ? 'from-emerald-400 to-teal-500'
+                : 'from-rose-500 to-pink-500'
+            }`} />
+
+            <div className="flex items-center gap-4 pb-2 border-b border-slate-100 dark:border-white/[0.05]">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-sm ${
                 editingMovement.tipo === 'ingreso' 
-                  ? 'bg-primary/10 border-primary/20 text-primary' 
-                  : 'bg-red-500/10 border-red-500/20 text-red-500'
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' 
+                  : 'bg-rose-500/10 border-rose-500/20 text-rose-500'
               }`}>
                 <span className="material-symbols-outlined text-2xl">
                   {editingMovement.tipo === 'ingreso' ? 'account_balance_wallet' : 'local_mall'}
                 </span>
               </div>
               <div className="overflow-hidden flex-1">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider mb-0.5 ${
-                  editingMovement.tipo === 'ingreso' 
-                    ? 'bg-primary/10 border-primary/20 text-primary' 
-                    : 'bg-red-500/10 border-red-500/20 text-red-500'
-                }`}>
-                  {editingMovement.tipo === 'ingreso' ? 'Ingreso' : 'Gasto'}
-                </span>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-extrabold uppercase tracking-wider ${
+                    editingMovement.tipo === 'ingreso' 
+                      ? 'bg-emerald-500/10 text-emerald-500' 
+                      : 'bg-rose-500/10 text-rose-500'
+                  }`}>
+                    {editingMovement.tipo === 'ingreso' ? 'Ingreso' : 'Gasto'}
+                  </span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-400 font-medium truncate">
+                    {editingMovement.categoria}
+                  </span>
+                </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white truncate leading-tight">
                   {editingMovement.title}
                 </h3>
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
+              {/* Connection Status Card */}
               {import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL ? (
-                <div className="text-[10px] font-semibold text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-xl text-center leading-normal flex items-center justify-center gap-1.5">
-                  <span className="material-symbols-outlined text-xs">sync</span>
-                  Conexión con Google Sheets activa
+                <div className="text-[10px] font-semibold text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl text-center leading-normal flex items-center justify-center gap-1.5 shadow-sm">
+                  <span className={`material-symbols-outlined text-xs ${savingToSheet ? 'animate-spin' : ''}`}>sync</span>
+                  {savingToSheet ? 'Sincronizando cambios...' : 'Conexión activa con Google Sheets'}
                 </div>
               ) : (
-                <div className="text-[10px] font-semibold text-amber-500 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-center leading-normal flex flex-col gap-1 items-center">
+                <div className="text-[10px] font-semibold text-amber-500 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-center leading-normal flex flex-col gap-1 items-center shadow-sm">
                   <div className="flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-xs">cloud_off</span>
                     Guardado solo local (Sin sincronizar)
                   </div>
-                  <span className="text-[8px] opacity-80">Falta configurar la variable VITE_GOOGLE_APPS_SCRIPT_URL</span>
                 </div>
               )}
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              {/* Input Monto */}
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-400 uppercase tracking-widest px-1">
                   Monto ({currency.symbol})
                 </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 font-semibold text-sm">
-                    {currency.symbol}
-                  </span>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+                    <span className="text-base font-bold select-none">{currency.symbol}</span>
+                  </div>
                   <input
                     type="number"
                     step="any"
                     value={editAmount}
                     onChange={(e) => setEditAmount(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                    disabled={savingToSheet}
+                    className="w-full bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-950 rounded-2xl py-3.5 pl-11 pr-4 text-base font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-all shadow-sm disabled:opacity-50"
                     placeholder="0.00"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              {/* Input Fecha */}
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-400 uppercase tracking-widest px-1">
                   Fecha
                 </label>
-                <input
-                  type="date"
-                  value={editDate}
-                  onChange={(e) => setEditDate(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl py-3 px-4 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
-                />
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors pointer-events-none">
+                    <span className="material-symbols-outlined text-lg">calendar_month</span>
+                  </div>
+                  <input
+                    type="date"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    disabled={savingToSheet}
+                    className="w-full bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-950 rounded-2xl py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-all shadow-sm disabled:opacity-50"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 mt-2">
+            <div className="flex flex-col gap-2.5 mt-2">
               <button
                 onClick={handleSaveEdit}
                 disabled={savingToSheet}
-                className="w-full py-3.5 px-4 rounded-2xl bg-primary text-white font-semibold hover:brightness-110 active:scale-[0.98] transition-all text-center text-sm shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-4 px-5 rounded-2xl bg-primary text-white font-bold hover:brightness-105 active:scale-[0.98] transition-all text-center text-sm shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {savingToSheet && <div className="size-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>}
+                {savingToSheet ? (
+                  <div className="size-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <span className="material-symbols-outlined text-lg">check_circle</span>
+                )}
                 {savingToSheet ? 'Guardando en la nube...' : 'Guardar Cambios'}
               </button>
 
@@ -1029,9 +1071,13 @@ export default function Movements() {
                   <button
                     onClick={handleResetEdit}
                     disabled={savingToSheet}
-                    className="w-full py-2.5 px-4 rounded-2xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-semibold transition-colors text-center text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
+                    className="w-full py-2.5 px-4 rounded-2xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold transition-colors text-center text-xs flex items-center justify-center gap-1.5 active:scale-[0.98] disabled:opacity-50"
                   >
-                    <span className="material-symbols-outlined text-sm">restart_alt</span>
+                    {savingToSheet ? (
+                      <div className="size-3.5 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin"></div>
+                    ) : (
+                      <span className="material-symbols-outlined text-base">restore</span>
+                    )}
                     {savingToSheet ? 'Restaurando...' : 'Restaurar Original'}
                   </button>
                 );
@@ -1040,7 +1086,7 @@ export default function Movements() {
               <button
                 onClick={() => setEditingMovement(null)}
                 disabled={savingToSheet}
-                className="w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-center text-xs disabled:opacity-50"
+                className="w-full py-3.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200 dark:hover:bg-slate-900/80 transition-colors text-center text-xs active:scale-[0.98] disabled:opacity-50"
               >
                 Cancelar
               </button>
